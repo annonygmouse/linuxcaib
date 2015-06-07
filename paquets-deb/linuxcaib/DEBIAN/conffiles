@@ -1,0 +1,7 @@
+/etc/lightdm/lightdm.conf.d/50-linuxcaib.conf
+/etc/lightdm/lightdm-gtk-greeter-caib.conf
+/etc/polkit-1/localauthority.conf.d/caib-policies
+/etc/sudoers.d/caib-proxy-env
+/etc/X11/Xsession.d/89caib
+/etc/init.d/caib-shutdown
+/etc/adobe/mms.cfg

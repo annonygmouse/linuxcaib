@@ -1,0 +1,8 @@
+#!/bin/sh
+
+#Script que dona a triar quin visor de PDF emprarà l'usuari per defecte
+
+touch /tmp/tmp.pdf
+caib-canvi-obrir-app-fitxer /tmp/tmp.pdf
+rm /tmp/tmp.pdf
+

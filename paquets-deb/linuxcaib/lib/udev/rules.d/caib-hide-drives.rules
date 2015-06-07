@@ -1,0 +1,65 @@
+
+# linuxcaib
+
+#Restriccions, no pot ser un enllaç a un fitxer dins /opt/caib/linuxcaib/ad-policies... debian no deixa.
+
+#TODO:
+# fer un script que actualitzi el rules de P:
+# amagar tots els disks/particions que NO son de xarxa
+# fer que si l'usuari te el role PUNITOT2 si que se mostrin
+# /fer que si l'usuari es administrador de la màquina sí que se mostrin
+
+#Politica de AD feta a mida per la CAIB els valors possibles son:
+#VALUENAME "NoDrives"
+#			   ITEMLIST
+#				   NAME "Total"  VALUE NUMERIC 0
+#				   NAME "Total excepto P" VALUE 32768
+#				   NAME "CD - Disquete"	VALUE NUMERIC  65011510
+#				   NAME "CD - Disquete - Q"	VALUE NUMERIC   67043126
+#				   NAME "CD"	VALUE NUMERIC  65011511
+#				   NAME "CD - Q"	VALUE NUMERIC  67043127
+#				   NAME "Restringido"	VALUE NUMERIC  65011519
+#				   NAME "Restringido - Q"	VALUE NUMERIC   67043135
+
+#On:
+# "Total" no té cap restricció, pot veure totes les unitats.
+# "Restringido" només pot montar G, H i V.
+# "CD - Disquete" només pot montar A, D, G, H i V   (ja que D sol ser el lector CD/DVD)  
+# "CD" només pot montar D, G, H i V   (ja que D sol ser el lector CD/DVD)  
+
+# Per simplificar la restricció màxima serà deixar montar: G, H i V.
+# Preparar per donar role per poder montar disquettes
+# Preparar per donar role per poder montar CD/DVD/BD
+# Preparar per donar role per poder montar disks durs externs USB (pen drives)
+# Amb el rol punitot2 se eliminen totes les restriccions
+
+
+
+ACTION!="add|change", GOTO="hide_partitions_end"
+SUBSYSTEM!="block", GOTO="hide_partitions_end"
+KERNEL=="loop*|ram*", GOTO="hide_partitions_end"
+
+##############################################################################
+
+#A partir de ubuntu udisks2 s'ha d'emprar udisks_ignore
+
+#Amagam disks per a tothom
+#KERNEL=="sda5",ENV{DKD_PRESENTATION_HIDE}="1",,ENV{UDISKS_IGNORE}="0",RUN+="/home/u83511/testudev.sh"
+KERNEL=="sda*|sdb*|sdc*|sde*",ENV{DKD_PRESENTATION_HIDE}="1"
+
+#Amagam floppy
+KERNEL=="fd*",ENV{UDISKS_IGNORE}="0"
+
+# USB floppy drives
+SUBSYSTEMS=="usb", ATTRS{bInterfaceClass}=="08", ATTRS{bInterfaceSubClass}=="04", ENV{UDISKS_IGNORE}="0"
+
+#Mostram disks pel usuaris del grup punitot2
+#NO FUNCIONA.... KERNEL=="sda*|sdb*|sdc*|sde*",GROUP="punitot2",ENV{UDISKS_IGNORE}="0"
+#NO FUNCIONA.... KERNEL=="sda*|sdb*|sdc*|sde*",GROUP="sudo",ENV{UDISKS_IGNORE}="0"
+##############################################################################
+
+LABEL="hide_partitions_end" 
+
+
+#Per reiniciar udev: sudo udevadm control --reload && sudo udevadm trigger
+#Per mirar quins discs ha trobat udev: 

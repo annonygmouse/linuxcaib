@@ -1,0 +1,21 @@
+#!/bin/sh
+
+#Script que intenta emular la política de AD: Interactive logon: Software\CAIB\Acceso total al Panel de control
+
+#Hauriem de deshabilitar l'execució del gnome-control-center
+
+#El que feim per ara és deshabilitar l'administració d'usuari
+
+#TODO: quan l'usuari pertany al grup "pcfgtot" l'usuari ha de poder administrar. 
+#En altre cas NO ha de poder administrar. 
+
+if [ "$(groups $USER |grep -q pcfgtot && echo "SI")" = "SI" ];then
+        potAdministrar="true"
+else
+        potAdministrar="false"
+fi
+
+logger -t "linuxcaib-ad-policies($USER): disable-control-panel" -s "INFO: potAdministrar=$potAdministrar"
+gsettings set org.gnome.desktop.lockdown user-administration-disabled $potAdministrar
+
+logger -t "linuxcaib-ad-policies($USER): disable-control-panel" -s "Fi" 

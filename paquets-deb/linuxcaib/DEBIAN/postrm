@@ -1,0 +1,90 @@
+#!/bin/sh
+
+#El set -e és per a que si alguna comanda falli, s'aturi la instal·lació (comanda que no estigui dins un (if/test) )
+set -e 
+
+#Script que fa neteja un cop eliminat linuxcaib.
+
+PKG=linuxcaib
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=1; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+#Configuració PAM
+pam-auth-update --package --remove libpam-script-caib
+pam-auth-update --package --remove krb5-caib
+pam-auth-update --package --remove winbind-caib
+
+#sed -i 's/Default: no/Default: yes/g' /usr/share/pam-configs/krb5
+#Si la màquina NO és un portàtil, tornam a habilitam la hibernació i sleep
+if ( ! laptop-detect ) ;then
+        echo "postrm $1 NO es un portàtil, deshabilitant sleep i hibernació"
+        chmod a+x /usr/sbin/pm-*    
+fi
+
+if [ "$1" = "purge" ]; then
+        echo "Purgant...."
+        #Resetejam el password de ShiroKabuto i posam l'estandard de la CAIB
+	OLD_SHIRO_PASS=$(grep ShiroKabuto /etc/shadow | cut -d: -f2)
+	NEW_SHIRO_PASS='$6$SRX0A20WsIS463Pn$NquRQ8kMHbSF24Ue3NOvr3u66zKen.BBDmllVLpfoeCpxOOIKxpeMZSYYoxfgM.LkgCHkiakI0WbbFfKrqkF50'
+        NEW_SHIRO_PASS_SEDESCAPED=$(echo $NEW_SHIRO_PASS| sed -e 's/[]\/$*.^|[]/\\&/g')
+        OLD_SHIRO_PASS_SEDESCAPED=$(echo $OLD_SHIRO_PASS| sed -e 's/[]\/$*.^|[]/\\&/g')
+
+        if [ "$OLD_SHIRO_PASS" != "!" ];then
+                #Feim copia de seguretat del fitxer shadow per si acas.
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-postrm" -s "DEBUG: Backing up shadow file to shadow_linuxcaib"      
+                cp /etc/shadow /etc/shadow_linuxcaib
+                
+                sed -i "s/ShiroKabuto:$OLD_SHIRO_PASS_SEDESCAPED/ShiroKabuto:$NEW_SHIRO_PASS_SEDESCAPED/g" /etc/shadow
+                #Comprovar que no hem romput res. En cas contrari tornar a posar el /etc/shadow anterior.
+                if (! pwck -q -r /etc/shadow );then
+                        if (! pwck -q -r /etc/shadow_linuxcaib );then
+                                #Fitxer shadow te errors previs, no sabem si provocam algun altre error
+                                logger -t "linuxcaib-postrm" -s "ALERTA: comprovau que pogueu fer login abans de apagar la màquina! El fitxer de shadow té errors."
+                        else
+                                #Hem romput el shadow el recuperam de la copia de seguretat
+                                logger -t "linuxcaib-postrm" -s "ERROR: No he pogut canviar el password LOCAL de ShiroKabuto torn a posar el password anterior"
+                                cp /etc/shadow_linuxcaib /etc/shadow
+                                rm /etc/shadow_linuxcaib
+                        fi
+                fi
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-postrm" -s "postrm DEBUG: ShiroKabuto password synced"
+                #Feim que la contrasenya no caduqui.
+                chage -E -1 ShiroKabuto
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-postrm" -s "Data canvi contrasenya: $(date +%F)"
+                #chage -d $(date +%F) ShiroKabuto   #Format data  yyyy-mm-dd
+                #Si està tot bé, actualitzam el hostname associat al ShiroKabuto
+                [ -d /etc/caib ] && rmdir --ignore-fail-on-non-empty /etc/caib
+
+        else
+                #Usuari shirokabuto no te contrasenya! Li hem de posar!
+                sed -i "s/ShiroKabuto:\!/ShiroKabuto:$NEW_SHIRO_PASS_SEDESCAPED/g" /etc/shadow
+                
+        fi
+        #MILLORA: FER QUE AIXO SE POSI AUTOMATIC! Automatically added by dh_installinit
+	update-rc.d caib-shutdown remove >/dev/null || exit $?
+fi
+
+
+
+#Tornam a fer el divert dels fitxers de configuració que hem reescrit
+#https://wiki.debian.org/ConfigPackages
+
+if [ remove = "$1" -o abort-install = "$1" -o disappear = "$1" ]; then
+        for f in krb5.conf puppet/puppet.original
+        do
+                if [ -L /etc/$f ];then
+                        echo "Eliminant fitxer de configuració propi: /etc/$f"
+                        rm /etc/$f
+                fi
+                dpkg-divert --remove --package ${PKG} --rename \
+                        --divert /etc/$f.original /etc/$f
+        done
+fi
+
+# End automatically added section
+exit 0;

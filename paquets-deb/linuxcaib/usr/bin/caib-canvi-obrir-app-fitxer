@@ -1,0 +1,59 @@
+#!/bin/sh
+
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+show_caib_canvi_obrir_app_fitxer_help () {
+cat << EOF
+Donat un fitxer, treu per terminal les aplicacions del sistema amb les 
+que se pot obrir el tipus de fitxer i permet canviar l'aplicació pre-determinada amb la que obrir-la.
+
+Ús: ${0##*/} [-h] fitxer
+
+      -h          mostra aquesta ajuda
+
+Exemples:
+      ${0##*/} cert1.pdf  Mostra i permet triar tots els programes per veure fitxers PDF
+EOF
+}
+
+
+if [ "$1" = "-h" ];then
+	show_caib_canvi_obrir_app_fitxer_help
+	exit 1;
+fi
+
+
+
+if [ -z "$1" ];then
+        echo "Heu de passar un fitxer per paràmetre"
+	show_caib_canvi_obrir_app_fitxer_help
+	exit 1;
+fi
+
+fileMimeType=$(xdg-mime query filetype $1)
+  
+currentApp=$(xdg-mime query default $fileMimeType)
+
+echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació $currentApp"
+
+echo "Les aplicacions instal·lades que poden obrir fitxers de tipus $fileMimeType son:"
+for app in $(fgrep pdf /usr/share/applications/mimeinfo.cache|grep $fileMimeType|cut -d= -f2|sed 's/;/ /g')
+do
+        printf "\t$app\n"
+done
+echo "Feis copy&paste de l'aplicació que voleu emprar a partir d'ara per obrir els fitxers de tipus $fileMimeType"
+echo "En cas que no volgueu canviar l'aplicació predeterminada actual, premeu intro"
+read newDefaultApp
+if [ "$newDefaultApp" != "" ];then
+        xdg-mime default evince.desktop $fileMimeType
+        echo "Definint l'aplicació $newDefaultApp com aplicació pre-determinada per obrir fitxers de tipus $fileMimeType"
+else
+        echo "No s'ha canviat l'aplicació pre-determinada per obrir fitxers de tipus $fileMimeType"
+fi
+

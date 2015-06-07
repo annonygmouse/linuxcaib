@@ -1,0 +1,21 @@
+Name: Kerberos authentication CAIB
+Default: yes
+Priority: 255
+Conflicts: krb5
+Auth-Type: Primary
+Auth:
+	optional	pam_krb5.so minimum_uid=1000 try_first_pass debug=true
+Auth-Initial:
+	optional	pam_krb5.so minimum_uid=1000 debug=true
+Account-Type: Additional
+Account:
+	optional			pam_krb5.so minimum_uid=1000 debug=true
+Password-Type: Primary
+Password:
+	optional	pam_krb5.so minimum_uid=1000 try_first_pass use_authtok debug=true
+Password-Initial:
+	optional	pam_krb5.so minimum_uid=1000 debug=true
+Session-Type: Additional
+Session:
+	optional			pam_krb5.so minimum_uid=1000 debug=true
+        

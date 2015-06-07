@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Emprar "udisk" per filtrar els disks a amagar
+
+# Llista de particions udisksctl dump |grep " Device:"|grep -v loop|grep -v ram| awk '{ print $2 }'
+# Obtenim la info d'una partició específica: udisksctl info -b /dev/sda1
+# Obtenim el punt de montatge (o buid si no està montada) udisksctl info -b /dev/sda6 |grep MountPoints| awk '{ print $2 }'
+
+# Després crear `/etc/udev/rules.d/99-hide-partitions.rules' with the content:
+# KERNEL=="sda1", ENV{UDISKS_PRESENTATION_HIDE}:="1"
+# Reiniciar 
+#       udevadm control --reload-rules
+#       udevadm trigger
+# Tot això ABANS d'arrancar el nautilus!!!
+
+#TODO: mirar com evitar que montin pen-drives! (amb mètode udisk+udevrules evitam que apareixin al nautilus, però no s'evita el montatge crec)
+
+if [ "$(groups $USER |grep -q punitot2 && echo "SI")" = "SI" ];then
+        logger -t "ad-policy: caib-conf-hide-drives($USER)" -s "INFO: no cal amagar rés, usuari te el role punitot2"
+        return
+fi
+
+
+
+#Si l'usuari no te permis punitot2, amaga totes les unitats locals.
+#L'usuari només podrà veure les unitats de xarxa
+
+#Això se fa amb udev-rules (hide-partitions-rules) i canvis a la configuració dels filemanagers (nautilus + thunar)
+
+
+#Fa que NO mostri les unitats montades a l'escriptori 
+gsettings set org.gnome.nautilus.desktop volumes-visible false
+#Hem de llevar "x-gvfs-show" 
+
+
+#Amagam / i network a thunar
+#TODO: posar el text seguent dins $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+
+if [  -f $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml ];then
+        if ( ! grep hidden-bookmarks $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml > /dev/null );then
+                #Eliminam etiqueta final </channel> 
+                /bin/sed -i "/^</channel>/d" $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+                cat >> $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml << EOF
+  <property name="hidden-bookmarks" type="array">
+    <value type="string" value="file:///"/>
+    <value type="string" value="network:///"/>
+  </property>
+EOF
+        fi
+fi
+
+#Podem amagar els filesystems al thunar mitjançant:
+#<property name="hidden-devices" type="array">
+#    <value type="string" value="B89CC11C9CC0D652"/>
+#</property>
+
+
+#abans de l'etiqueta </channel>
+echo "</channel>" >> $HOME/.config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
+
+logger -t "linuxcaib-ad-policies($USER): caib-conf-hide-drives" -s "Fi" 

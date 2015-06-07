@@ -1,0 +1,50 @@
+#! /bin/sh
+
+#Script que reseteja el dissof, tant de màquina com d'usuari.
+#El que fa és posar a 0 els les claus doexus i doexmaq
+
+export LANG=C.UTF-8
+#Importam les funcions auxiliars
+#Ruta base scripts
+BASEDIRPAM=$(dirname $0)
+#echo "\$0 = $0"
+#echo "readlink 0 = $(readlink $0)"
+
+if [ "$(readlink $0)" = "" ];then
+        #no es un enllaç, agafam ruta normal
+#        echo "fitxer normal"
+        RUTA_FITXER=$(dirname $0)
+        BASEDIR=$RUTA_FITXER
+else
+#        echo "enllaç"
+        RUTA_FITXER=$(readlink $0)
+        BASEDIR=$( dirname $RUTA_FITXER)
+fi
+
+#logger -t "linuxcaib-resetejar-dissof" -s "BASEDIR=$BASEDIR"
+stamp=`/bin/date +'%Y%m%d%H%M%S %a'`
+# get the script name (could be link)
+script=`basename $0`
+
+if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
+        #logger -t "linuxcaib-resetejar-dissof" -s "CAIB_CONF_SETTINGS=$CAIB_CONF_SETTINGS Carregam utils de /opt/caib/linuxcaib/caib-conf-utils.sh"
+        . /opt/caib/linuxcaib/caib-conf-utils.sh
+fi
+
+
+echo "Resetejant dissof de màquina"
+echo "0" | sudo tee /opt/caib/dissoflinux/doexmaq > /dev/null
+#echo "0" > /opt/caib/dissoflinux/doexmaq
+if [ "$?" != "0" ];then
+      logger -t "linuxcaib-resetejar-dissof" -s "Cal tenir permissos d'administrador per poder resetejar el dissof de màquina!"
+fi
+
+
+
+usuariLoggedInXWindow=$(XWindowsLoggedUser)
+logger -t "linuxcaib-resetejar-dissof" "Hi ha Usuari loguejat a les X? usuariLoggedInXWindow=$usuariLoggedInXWindow "
+if [ "$usuariLoggedInXWindow" != "" ];then
+	echo "Resetejant dissof de l'usuari"
+	echo "0" > /home/$usuariLoggedInXWindow/.dissof/doexus
+fi
+
