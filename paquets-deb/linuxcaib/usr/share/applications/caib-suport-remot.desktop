@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Suport Remot
-Exec=/usr/bin/caib-vnc
-MimeType=application/x-sh
-Icon=Suport_77070
-Terminal=false
-Type=Application
-Categories=caib
-Comment=Aplicació que obri el VNC per poder tenir suport remot a la CAIB.

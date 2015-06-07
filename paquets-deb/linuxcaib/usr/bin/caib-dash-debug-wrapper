@@ -1,6 +1,0 @@
-#! /bin/sh
-
-set -x
-aleatori=$(mktemp -u|cut -d"." -f2)
-DEBUG=3
-. $@ >> /tmp/caib-dash-debug-wrapper-$aleatori.sh 2>> /tmp/caib-dash-debug-wrapper-$aleatori.sh
