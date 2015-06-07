@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Navegar sistema fitxers com a root
+Comment=Navegar sistema de fitxers amb el file manager
+Exec=pkexec nautilus /
+Icon=file-manager
+Terminal=false
+Type=Application
+Categories=Application;System;

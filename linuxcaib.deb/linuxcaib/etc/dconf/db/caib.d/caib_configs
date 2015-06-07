@@ -1,0 +1,25 @@
+#Aqui posar les configuracions específiques per la CAIB
+[org/gnome/desktop/lockdown]
+disable-command-line=false
+disable-printing=false
+
+#Habilitam numlock
+[org/gnome/settings-daemon/peripherals/keyboard]
+numlock-state='on'
+
+#Definim el fons de pantalla de la pantalla de bloqueig
+#[org/gnome/desktop/screensaver]
+#picture-uri='file:///path/to/my/picture.jpg'
+
+
+#Feim que al menu de sistema no surti la llista d'usuaris locals
+#Feim que al menu de sistema apareixi el nom de l'usuari (codi usuari seycon)
+[apps/indicator-session]
+user-show-menu=false
+show-real-name-on-panel=true
+
+#Política de AD: no agrupar aplicacions -> ERROR : ignoring invalid group name: 
+#[/org/gnome/gnome-panel/layout/objects/window-list-0/instance-config]
+#group-windows=never-group
+
+

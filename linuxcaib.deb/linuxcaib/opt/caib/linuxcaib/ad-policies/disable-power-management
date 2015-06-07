@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#Script que deshabilita el control d'energia 
+
+#Només s'activa si NO és un laptop!
+#http://askubuntu.com/questions/67355/how-do-i-completely-turn-off-screensaver-and-power-management
+
+#Si la màquina NO és un portàtil, deshabilitam la hibernació i sleep
+if ! /usr/sbin/laptop-detect;then
+        gsettings set org.gnome.settings-daemon.plugins.power active false
+        logger -t "linuxcaib-ad-policies($USER): disable-power-management" -s "NO és un portàtil, deshabilitam el control d'energia"
+fi
+
+

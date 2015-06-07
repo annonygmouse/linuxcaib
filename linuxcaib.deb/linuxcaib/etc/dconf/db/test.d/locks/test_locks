@@ -1,0 +1,17 @@
+#Aqui posam les configuracions que volem que l'usuari NO pugui tocar a la CAIB
+#/org/gnome/desktop/lockdown/disable-user-switching
+
+#Remember that users can access the command line from other parts of the desktop as well. If you want to disable any kind of access to the command line, you will have to remove entries for GNOME Terminal and any other kind of terminal emulator (xterm, rxvt, etc) from the main menu. You will also need to disable the Deskbar applet from the panel lockdown options since it lets users execute commands.
+#/desktop/gnome/lockdown/disable_lock_screen 	Boolean	This key, if enabled, disallows the user to lock the screen.
+#/desktop/gnome/lockdown/disable_printing 	Boolean	This key, if enabled, prevents the user from printing (it disables the print option).
+#/desktop/gnome/lockdown/disable_print_setup 	Boolean	This key, if enabled, prevents the user from modifying print settings by disallowing access to the "Print Setup" dialog box.
+#/desktop/gnome/lockdown/disable_save_to_disk 	Boolean	This key, if enabled, prevents the user from saving any files via GNOME applications. All "Save" and "Save As" options are disabled if this key is set to True.
+#/desktop/gnome/lockdown/disable_user_switching 	Boolean	This key, if set, disallows the user to switch to another user account if her session is already running. 
+
+#/apps/panel/global/locked_down 	Boolean	This key, if enabled, prevents the users from modifying the panel altogether (though this may not apply to the individual applets in the panel).
+#    Note: Enabling/disabling this key requires a restart of the panel.
+
+#/apps/panel/global/disable_force_quit 	Boolean	This key, if enabled, disallows the user from forcing an application to quit uncleanly (killing the application) by remving access to the force quit button.
+#/apps/panel/global/disable_lock_screen 	Boolean	This key, if enabled, prevents the user from accessing the "Lock Screen" panel button and menu entries.
+#/apps/panel/global/disable_log_out 	Boolean	This key, if enabled, prevents the user from logging out by disabling access to the "Log Out" button and menu entries.
+#/apps/panel/global/disabled_applets 	List of Strings	This is a list of disabled applets (identified by IIDs). As an example, if you wish to disable the Clock applet, add "OAFIID:GNOME_ClockApplet" to the list. 

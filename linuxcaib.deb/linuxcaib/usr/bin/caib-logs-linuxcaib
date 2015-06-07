@@ -1,0 +1,16 @@
+#!/bin/sh
+
+logFile="/tmp/caib-logs-linuxcaib-$(date +%Y%m%d_%H%M%S).log"
+
+#Si no esteim executant amb permissos de root, haurem d'emprar sudo per executar les comandes administratives.
+if [ ! $(id -u) -eq 0 ];then
+        SUDO="sudo "
+fi
+
+$SUDO grep caib- /var/log/syslog > $logFile
+
+if [ -z $DISPLAY ];then
+        echo "Exportats els logs de linuxcaib a $logFile"
+else
+        zenity --info --title="logs-linuxcaib"  --text="Exportats els logs de linuxcaib a $logFile"
+fi

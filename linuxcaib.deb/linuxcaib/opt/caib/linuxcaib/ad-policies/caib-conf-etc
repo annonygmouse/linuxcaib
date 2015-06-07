@@ -1,0 +1,16 @@
+#!/bin/sh
+
+#Aqui hi ha diverses configuracions particulars de GNU/Linux
+#que no tenen un mapeig directe a cap política de AD
+
+#Que no soni la campana
+gsettings set org.gnome.desktop.wm.preferences audible-bell false
+
+#Que nautilus demani donar opció de veure o executar un script de shell (amb permissos d'execució)
+gsettings set org.gnome.nautilus.preferences executable-text-activation 'ask'
+
+#Deshabilitar tabulador i emprar espais al gedit
+gsettings set org.gnome.gedit.preferences.editor insert-spaces true
+gsettings set org.gnome.gedit.preferences.editor tabs-size 'uint32 8'
+gsettings set org.gnome.gedit.preferences.editor create-backup-copy false
+logger -t "linuxcaib-ad-policies($USER): caib-conf-etc" -s "Fi" 

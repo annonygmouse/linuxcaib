@@ -1,0 +1,31 @@
+#!/bin/sh
+
+#Script per canviar la contrasenya
+# Actualitza la data del darrer canvi de contrasenya.
+# REQUISITS: s'ha de llançat via un terminal (ie: gnome-terminal caib-chgpasswd.sh ) amb permissos de ROOT! (id -u=0)
+#Torna 0 si s'ha canviat correctament,
+#Torna 1 en cas contrari
+
+logger -t "linuxcaib-chgpasswd($USER)" "usuari=$USER id=$(id -u)"
+
+#Strings que torna kpasswd:
+#Si canvi password OK -> Password changed.
+#Si canvi password no ha anat bé -> Password change rejected
+#Si no s'ha posat el password actual -> kpasswd: Preauthentication failed getting initial ticket
+#Si nous passwords no son iguals -> kpasswd: Password mismatch while reading password
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+
+if kpasswd $USER ;then
+        logger -t "linuxcaib-chgpasswd($USER)" -s "password de l'usuari $USER canviat"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-chgpasswd($USER)" -s "Data canvi contrasenya: $(date +%F)"
+        sleep 3
+        RETURN=0
+else
+        logger -t "linuxcaib-chgpasswd($USER)" -s "password NO canviat"
+        RETURN=1
+fi
+
+exit $RETURN
+

@@ -1,0 +1,118 @@
+#!/bin/sh
+
+#Script per canviar a nivell global la JVM emprada
+#Només mostra les JVM d'oracle
+#Cal que l'usuari tengui permisos de sudo per poder canviar la JVM!
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+show_caib_canvi_jvm_global_help () {
+cat << EOF
+Afageix el certificat passat per paràmetre als navegadors i JAVA de l'usuari.
+
+Ús: ${0##*/} [-ha]
+
+      -h          mostra aquesta ajuda
+      -a          tria entre totes les JVM (no només les d'oracle)
+
+EOF
+}
+
+
+if [ "$1" = "-h" ];then
+	show_caib_canvi_jvm_global_help
+	exit 1;
+fi
+
+
+#Primer mostram les JVM disponibles:
+
+#Si no esteim executant amb permissos de root, haurem d'emprar sudo per executar les comandes administratives.
+if [ ! $(id -u) -eq 0 ];then
+        SUDO="sudo "
+fi
+
+
+echo "Llista de JVMs disponibles"
+if [ "$1" = "-a" ];then
+        $SUDO update-java-alternatives -l | cut -d" " -f 1,3
+else 
+        echo "excepte les openjdk"
+        $SUDO update-java-alternatives -l | grep -v "openjdk"|cut -d" " -f 1,3
+fi
+
+echo "Fes copy/paste del nom de la JVM que vols emprar i prem 'intro'"
+read JVMTRIADA
+
+if [ ! -d /usr/lib/jvm/$JVMTRIADA ];then
+        echo "ERROR: màquina virtual java no trobada, segur que heu fet be el copy&paste?"
+        exit 1;
+fi
+echo "actualitzant la JVM a nivell de sistema emprant la versió: $JVMTRIADA"
+$SUDO update-java-alternatives -s $JVMTRIADA
+
+if [ $? != 0 ];then
+        echo "ERROR: update-java-alternatives NO ha funcionat, arreglau l'error"
+fi
+
+#WARNING: si dins la configuració de l'usuari hi ha alguna JVM superior, encara que estigui desmarcada, s'emprarà el plugin
+#de la JVM superior per defecte! La única manera de fer que el navegador empri el plugin de la JVM ara triada és eliminar
+#les JVMs superiors de la configuració de l'usuari. Per això intentarem eliminar les versions superiors
+
+#1. Executam el controlpanel per a que doni d'alta la JVM elegida
+JAVACP=""
+if [ -f /usr/lib/jvm/$JVMTRIADA/bin/ControlPanel ];then
+        JAVACP=/usr/lib/jvm/$JVMTRIADA/bin/ControlPanel
+else
+        if [ -f /usr/lib/jvm/$JVMTRIADA/bin/jcontrol ];then
+                JAVACP="/usr/lib/jvm/$JVMTRIADA/bin/jcontrol"
+        else
+                if [ -z "$1" ];then
+                        echo "EkRROR: no he trobat l'executable del java control panel!"
+                        return 1;
+                else
+                        echo "OpenJDK NO té panel de control... no s'ha de fer res!"
+                        exit 0
+                fi
+        fi
+fi
+
+if [ ! -z $JAVACP ];then
+        zenity --info --text="ALERTA: ara s'obrirà el panel de control de java. Li has de donar al botó de 'OK' per a que s'actualitzi la configuració"
+        $JAVACP
+fi
+#2. cercar el path de la nova JVM dins .java/deployment/deployment.properties
+minIndexVersioJRE=$(grep "$JVMTRIADA" $HOME/.java/deployment/deployment.properties|cut -d. -f4)
+if [ "$minIndexVersioJRE" = "-1" ];then
+        echo "ERROR: no he pogut actualitzar el fitxer de configuració .java/deployment/deployment.properties"
+        echo "L'haureu d'editar manualment via ControlPanel o jcontrol"
+        echo $(grep "$JVMTRIADA" $HOME/.java/deployment/deployment.properties)
+        exit 0;
+fi
+
+echo "Index versio java configurada: $minIndexVersioJRE"
+#3. eliminam les versions amb index menor (versions superiors)
+minIndexVersioJRE=`echo $minIndexVersioJRE - 1 | bc`
+echo "Eliminam les versions amb index menor (versions superiors) que $minIndexVersioJRE"
+while [ "$minIndexVersioJRE" -ge "0" ];do
+        jvmVersion=$(grep "deployment.javaws.jre.$minIndexVersioJRE.product" $HOME/.java/deployment/deployment.properties|cut -d= -f2)
+        echo "eliminant la configuració de la JVM $jvmVersion ($minIndexVersioJRE)"
+        sed -i "/jre\.$minIndexVersioJRE/d" $HOME/.java/deployment/deployment.properties
+        minIndexVersioJRE=`echo $minIndexVersioJRE - 1 | bc`
+        mostrarCP="SI"
+done
+sleep 2
+
+#Si hem esborrat alguna JRE del fitxer deployment.properties, tornam a executar el control panel per a que 
+#reconstrueixi i validi el fitxer.
+if [ ! -z "$mostrarCP" ];then
+        if [ ! -z $JAVACP ];then
+                zenity --info --text="ALERTA: ara se tornarà a obrir el panel de control de java. Comprovau que estiguin les JVM correctes"
+                $JAVACP
+        fi
+fi

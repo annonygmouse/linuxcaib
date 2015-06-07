@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#Instalador de l'api de firma a la JVM actual
+#Si es passa un paràmetre ha de ser la versió de l'API de firma que es vulgui instal·lar
+
+apifirmaVersio=4.2.1
+jvmdir=$(dirname $(readlink /etc/alternatives/java) | cut -d/ -f1-5)
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+# Initialize our own variables:
+output_file=""
+
+show_caib_install_api_firma_help () {
+cat << EOF
+El programa "${0##*/}" instal·la l'API de firma de la CAIB a la màquina virtual actual
+
+Ús: ${0##*/} [-h] [-v VERSIO] [-p RUTA_JVM]
+    
+      -h          mostra aquesta ajuda
+      -v VERSIO   versió de l'API de firma a instal·lar
+      -p RUTA_JVM ruta de la JVM on es vol instal·lar
+      -v          mode verbose
+
+Exemples:
+        ${0##*/}   Instal·lació de l'API de firma versió $apifirmaversio a la JVM actual
+        ${0##*/} -v 4.2.2 -p /usr/lib/jvm/jre-6-oracle-x64     Instal·lació de l'API de firma versió $apifirmaversio a la JVM 6.
+EOF
+}
+
+#Fi funcions
+
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+
+# Initialize our own variables:
+output_file=""
+
+while getopts "h?p:v:" opt; do
+    case "$opt" in
+    h|\?)
+        show_caib_install_api_firma_help
+        exit 0
+        ;;
+    p)  jvmdir="$OPTARG"
+        ;;
+    v)  apifirmaVersio="$OPTARG"
+        ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+
+#TODO: descarregar de archiva!
+#wget http://archiva.gforge.caib.es/....../
+
+if [ -f /tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar ];then
+	if [ -d $jvmdir/jre ];then
+		echo "Es una JDK, install dins jre interna!"
+		jvmdir=$jvmdir"/jre"
+	fi 
+	echo "Instal·lant: signaturacaib.install4j-$apifirmaVersio-installer-lin.jar dins $jvmdir"
+	java -jar $HOME/tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar -dev -jvm:$jvmdir
+else
+	echo "S'ha de posar l'instal·lador signaturacaib.install4j-$apifirmaVersio-installer-lin.jar dins /tmp"
+fi

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#Per paràmetre, la URL de la CRL
+
+if [ -z $1 ];then
+	echo "El paràmetre ha de ser la URL de la CRL"
+	exit 1;
+fi
+
+wget -q --no-check-certificate -O -  $1  --no-check-certificate | openssl crl -inform DER -text -noout
+

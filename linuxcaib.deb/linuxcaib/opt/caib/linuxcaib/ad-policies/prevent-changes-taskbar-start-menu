@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#Script que intenta emular la política de AD: Interactive logon: Prevent changes to Taskbar and Start Menu Settings
+
+#Explanation
+#Removes the Taskbar and Start Menu item from Settings on the Start menu. This setting also prevents the user from opening the Taskbar Properties dialog box.
+#If the user right-clicks the taskbar and then clicks Properties, a message appears explaining that a setting prevents the action.
+
+#TODO: mirar les propietats que se puguin bloquejar del taskbar. De l'start menu crec que no se pot fer rés.
+
+

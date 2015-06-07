@@ -1,0 +1,16 @@
+#!/bin/sh
+
+#Script que intenta emular la política de AD: Hide My Network Places icon on desktop
+
+#Explanation
+#Removes the My Network Places icon from the desktop.
+
+#This setting only affects the desktop icon. It does not prevent users from connecting to the network or browsing for shared computers on the network.
+
+
+#Feim que NO surti la icona de "network places" a l'escriptori
+gsettings set org.gnome.nautilus.desktop network-icon-visible false
+logger -t "linuxcaib-ad-policy($USER): hide-network-places" -s "Deshabilitam visibilitat icona de xarxa"
+#TODO: veure caib-conf-hide-drives
+
+

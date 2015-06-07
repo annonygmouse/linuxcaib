@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#Tan sols permetem un únic workspace per no embullar els usuaris
+
+gsettings set org.gnome.desktop.wm.preferences num-workspaces 1
+
+logger -t "linuxcaib-ad-policies($USER): caib-one-workspace" -s "Fi"
+
+

@@ -1,0 +1,61 @@
+#!/bin/sh
+# By: Bresiyel 1-28-2012
+# Adds programs to polkit for gui view
+progAdd=$1
+progLoc=$(echo `whereis "$progAdd" | awk '{print $2}'`)
+
+verify(){
+if [ "$progAdd" == "" ];
+then
+   echo "Program usage: poladd program"
+   exit 1
+fi
+if [ "$progLoc" == "" ];
+then
+   echo "Did not find $progAdd"
+   exit 1
+elif [ `echo $progLoc | grep bin` == "" ];
+then
+   echo "Found location $progLoc, however this may not be valid..."
+   echo "Exiting..."
+   exit 1
+fi
+exists
+return
+}
+exists(){
+alreadyHere=$(cat /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy | grep "$progAdd")
+if [ "$alreadyHere" != "" ];
+then
+   echo "This program is already configured."
+   exit 1
+fi
+return
+}
+addProgram(){
+if [ -e /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy ];
+then
+   sudo cp -f /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy ~/org.freedesktop.policykit.pkexec.policy.backup
+   cat /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy | sed 's_</policyconfig>__' | sudo tee /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy
+   echo "  <action id=\"org.freedesktop.policykit.pkexec."$progAdd"\">
+    <description>Run "$progAdd"</description>
+    <message>Authentication is required to run "$progAdd"</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key=\"org.freedesktop.policykit.exec.path\">"$progLoc"</annotate>
+    <annotate key=\"org.freedesktop.policykit.exec.allow_gui\">true</annotate>
+  </action>
+  
+</policyconfig>" | sudo tee -a /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy
+else
+        echo "Sample policy file /usr/share/polkit-1/actions/org.freedesktop.policykit.pkexec.policy not found"
+fi
+return
+}
+
+verify
+addProgram
+exit

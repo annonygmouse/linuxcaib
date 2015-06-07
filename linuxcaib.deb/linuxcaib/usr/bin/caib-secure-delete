@@ -1,0 +1,48 @@
+#!/bin/bash
+#set -x
+
+
+show_caib_secure_delete_help () {
+cat << EOF
+Esborra de manera segura el fitxer o directori passat per paràmetre.
+La ruta ha de ser absoluta.
+Nota: NO serveix per dispositius FLASH.
+
+Ús: ${0##*/} [-h] [/ruta/fitxer/a/esborrar] | [/ruta/directori/a/esborrar]
+
+      -h          mostra aquesta ajuda
+
+EOF
+}
+
+if [ "$1" = "-h" ];then
+	show_caib_secure_delete_help
+	exit 1;
+fi
+
+
+if [ ! -f /usr/bin/srm ];then
+	zenity --error --title="Secure Delete" --text="El paquet secure-delete no està instal·lat."
+	exit 1;
+fi
+
+if [ -z "$1" ];then
+	show_caib_secure_delete_help
+	exit 1;
+fi
+if [ $(echo $1 | cut -c1-1) != "/" ];then
+        echo "Heu de passar la ruta completa (des de l'arrel) del fitxer o directori a esborrar!"
+        exit 1;
+fi
+echo $1
+dirnm=$(dirname "$1")
+
+echo " $dirnm $(/bin/df -T $dirnm | tail -n +2 )"
+if [ "$(/bin/df -T $dirnm | tail -n +2 | awk '{print $2}' |grep -v cifs|grep -v nfs)" == "" ];then
+	echo "ERROR: no es pot fer un esborrat segur de fitxers dins d'una unitat de xarxa."
+	exit 1;
+fi
+
+if dialog=`zenity --window-icon=warning --question --title="Secure Delete" --no-wrap --text="Esteu segurs que voleu eliminar de manera segura:\n\n     $1\n\ni tots els fitxers i carpetes sel·leccionats? Les dades seran sobreescrites i no se podran recuperar\n\nNOTA: sobre dispositius FLASH NO es recomana."`; then
+ /usr/bin/srm -fllrv "$@"| zenity --progress --pulsate --text="Eliminant fitxer..." --title="Secure Delete" --auto-close
+fi 

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+#Script que intenta emular la política de AD: ?????????????
+
+#Feim que l'usuari no pugui compartir impressores via SMB
+
+#TODO: no se pot des-habilitar la compartició de fitxers via samba des de dconf.
+#l'únic que se pot fer és assegurar-se que l'usuari no pertany al grup "sambashare"
+
+
+logger -t "linuxcaib-ad-policy: disable-printer-sharing($USER)" -s "PENDENT"

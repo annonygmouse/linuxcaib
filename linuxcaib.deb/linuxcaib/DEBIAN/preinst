@@ -1,0 +1,109 @@
+#!/bin/sh
+#El set -e és per a que si alguna comanda falli, s'aturi la instal·lació (comanda que no estigui dins un (if/test) )
+#set -e 
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=1; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+PKG=linuxcaib
+ 
+#Script que prepara la instal·lació de linuxcaib.
+
+#Comprovació de LOCALE
+
+#Si el locale ca_ES.utf8 està instal·lat el posam com a locale per defecte
+#ALERTA: a ubuntu i debian hi ha diferències!
+#if ( locale -a |grep -q ca_ES.utf8 );then
+#        localectl set-locale LANG=ca_ES.utf8
+#else
+        #Canviar dins /etc/locale.gen
+#        if (  grep -q "# ca_ES.UTF-8 UTF-8" /etc/locale.gen );then
+                #locale comentada
+#                sed -i 's/# ca_ES.UTF-8 UTF-8/ca_ES.UTF-8 UTF-8/g' /etc/locale.gen
+#                locale-gen
+#        fi
+#fi
+
+#Comprovar locale
+#if ( localectl | grep "System Locale" | grep -q "ca_ES.utf8" );then
+#        echo "Locale ca_ES.utf8 instal·lat"
+#else
+#        echo "ERROR: NO he pogut instalar el locale adient (ca_ES.UTF-8) al sistema"
+#        exit 1;
+#fi
+#Locale per Xs
+#localectl set-x11-keymap es
+
+sysLocale=$(locale |grep LANG=|tr '[a-z]' '[A-Z]'|cut -d= -f 2)
+if [ "$(echo $sysLocale |grep _ES.UTF)" = "" ];then
+	#A Debian CA_ES.UTF8 a Ubuntu CA_ES.UTF-8
+        echo "ERROR: locale del sistema és $sysLocale i hauria de ser ca_ES.UTF-8 ò es_ES.UTF-8 (ubuntu) o ca_ES.UTF8 es_ES.UTF8 (debian). Executau \"dpkg-reconfigure locale\" i posau la locale CA_ES.UTF8 com a pre-determinada."
+	LANG=C.UTF-8 /usr/bin/zenity --error --title="Instal·lació paquet LinuxCAIB"  --text="ERROR: locale del sistema és $sysLocale i hauria de ser CA_ES.UTF-8 (ubuntu) o CA_ES.UTF8 (debian). Executau \"dpkg-reconfigure locale\" i posau la locale CA_ES.UTF8 com a pre-determinada."
+        exit 1;
+fi
+
+
+#Còpies de seguretat dels fitxers de configuració que se sobreescriuen/modifiquen.
+echo "Fent còpia de seguretat dels fitxers de configuració que se sobreescriuen/modifiquen"
+mkdir -p /tmp/install-linuxcaib-backup/
+
+[ -f /etc/krb5.conf ] && cp /etc/krb5.conf /tmp/install-linuxcaib-backup/
+[ -f /etc/samba/smb.conf ] && cp /etc/samba/smb.conf /tmp/install-linuxcaib-backup/
+[ -f /etc/ligthdm/lightdm-gtk-greeter.conf ] && cp /etc/ligthdm/lightdm-gtk-greeter.conf /tmp/install-linuxcaib-backup/
+
+CNTLMVERSION=`dpkg -l| grep -w "\scntlm\s" | grep ^.i |   awk 'BEGIN { FS = " " } ; { print $3 }'`
+ARCH=$(dpkg --print-architecture)
+if [ "$CNTLMVERSION" = "" ];then
+	echo ""
+	echo "WARNING: Heu d'instal·lar el paquet CNTLM authbasic de http://gforge.caib.es/docman/view.php/160/140/cntlm_0.92.3_"$ARCH".deb"
+	# Detectar arquitectura del sistema i baixar el cntlm_i386 o cntlm_amd64 de la ruta corresponent.
+        if [ "$ARCH" = "amd64" ];then
+                ruta="160";
+        else
+                ruta="140";
+        fi
+	wget -q http://gforge.caib.es/docman/view.php/160/$ruta/cntlm_0.92.3_i386.deb -O /tmp/cntlm_0.92.3_$ARCH.deb
+	if [ -f  /tmp/cntlm_0.92.3_"$ARCH".deb ]; then
+		echo "Descarregat el cntlm de http://gforge.caib.es/docman/view.php/160/140/cntlm_0.92.3_"$ARCH".deb dins /tmp/cntlm_0.92.3_"$ARCH".deb"
+		echo "Per instalar-lo heu d'executar: sudo dpkg -i /tmp/cntlm_0.92.3_"$ARCH".deb"
+		echo "i després heu d'executar: sudo apt-get -f install"
+		echo "Un cop instal·lat heu d'executar: sudo update-rc.d cntlm disable ; echo \"cntlm hold\" | sudo dpkg --set-selections"
+		echo "Per evitar que s'actualitzi."
+	else
+		echo "No he pogut descarregar el cntlm de http://gforge.caib.es/docman/view.php/160/$ruta/cntlm_0.92.3_"$ARCH".deb dins /tmp/cntlm_0.92.3_"$ARCH".deb"
+                LANG=C.UTF-8 /usr/bin/zenity --warning --title="Instal·lació paquet LinuxCAIB"  --text="ERROR: No he pogut descarregar el cntlm de http://gforge.caib.es/docman/view.php/160/$ruta/cntlm_0.92.3_"$ARCH".deb dins /tmp/cntlm_0.92.3_"$ARCH".deb."
+	fi
+	echo ""
+	#exit 1;
+fi
+
+# En asseguram que carregui les configuracions de la carpeta /etc/sudoers.d ()
+if ( ! grep -q "#includedir /etc/sudoers.d" /etc/sudoers ) ;then
+        echo "#includedir /etc/sudoers.d" >> /etc/sudoers
+fi
+
+
+
+#Feim els diverts dels fitxers de configuració
+#https://wiki.debian.org/ConfigPackages
+#if [ upgrade != "$1" ] || dpkg --compare-versions "$2" lt 0.3-2; then
+#        dpkg-divert --package linuxcaib --add --rename \
+#            --divert /etc/pam.d/polkit-1.original \
+#            /etc/pam.d/polkit-1
+#fi
+
+#Abans empravem xscreensaver, ara ja no.
+if dpkg --compare-versions "$2" lt 0.5.2;then
+	if [ "$(readlink /usr/bin/gnome-screensaver-command)" = "/usr/bin/xscreensaver-command" ];then
+		rm /usr/bin/gnome-screensaver-command
+	fi
+fi
+
+
+
+exit 0;
+

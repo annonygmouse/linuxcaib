@@ -1,0 +1,19 @@
+
+
+Per generar el paquet linuxcaib.deb basta executar:
+
+fakeroot dpkg-deb --build linuxcaib
+
+i per instal·lar:
+
+dpkg -i linuxcaib.deb
+
+No quedarà ben instal·lat perquè faltaran dependències, per això
+en acabar s'ha d'executar:
+apt-get -f install
+
+Notes: si la màquina NO està en domini, després d'instal·lar s'ha
+d'executar "sudo pam-auth-update" i des-habilitar l'autenticació
+via winbind.
+
+

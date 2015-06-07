@@ -1,0 +1,19 @@
+#!/bin/sh
+
+#Script que intenta emular la política de AD: Interactive logon: Prevent changes to Taskbar and Start Menu Settings
+#Setting Path:
+#User Configuration/Administrative Templates/Start Menu and Taskbar
+
+
+#Lock del panel (també deshabilita l'edició de menus) però l'usuari encara pot executar alacarte manualment
+gsettings set org.gnome.gnome-panel.lockdown locked-down true
+if [ "$(groups $USER |grep -q punitot2 && echo "SI")" = "SI" ];then
+        gsettings set org.gnome.gnome-panel.lockdown locked-down false
+        logger -t "linuxcaib-ad-policy: disable-panel-changes($USER)" -s "Panel NO bloquejat"
+fi
+
+
+#MILLORA: evitar poder emprar alacarte i fer canvis manualment al Start Menu i edició del menu d'aplicacions
+   #Com: 
+	#Evitant que l'usuari executi "alacarte"? 
+	#Evitant que posi rés dins ~/.local/share/applications/
