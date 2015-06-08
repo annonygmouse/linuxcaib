@@ -290,7 +290,7 @@ case "$1" in
 
 	#Feim els diverts dels fitxers de configuració
 	#https://wiki.debian.org/ConfigPackages
-	for f in krb5.conf puppet/puppet.conf
+	for f in krb5.conf puppet/puppet.conf apparmor.d/usr.sbin.cupsd
 	do
 		dpkg-divert --add --package ${PKG} --rename \
 		        --divert /etc/$f.original /etc/$f

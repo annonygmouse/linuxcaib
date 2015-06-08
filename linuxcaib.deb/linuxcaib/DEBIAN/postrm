@@ -75,7 +75,7 @@ fi
 #https://wiki.debian.org/ConfigPackages
 
 if [ remove = "$1" -o abort-install = "$1" -o disappear = "$1" ]; then
-        for f in krb5.conf puppet/puppet.original
+        for f in krb5.conf puppet/puppet apparmor.d/usr.sbin.cupsd
         do
                 if [ -L /etc/$f ];then
                         echo "Eliminant fitxer de configuració propi: /etc/$f"
