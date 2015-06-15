@@ -17,6 +17,7 @@ logger -t "linuxcaib-chgpasswd($USER)" "usuari=$USER id=$(id -u)"
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
 
+#TODO: emprar: wbinfo --change-user-password username
 if kpasswd $USER ;then
         logger -t "linuxcaib-chgpasswd($USER)" -s "password de l'usuari $USER canviat"
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-chgpasswd($USER)" -s "Data canvi contrasenya: $(date +%F)"

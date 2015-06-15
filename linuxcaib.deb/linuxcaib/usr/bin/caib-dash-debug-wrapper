@@ -3,4 +3,5 @@
 set -x
 aleatori=$(mktemp -u|cut -d"." -f2)
 DEBUG=3
-. $@ >> /tmp/caib-dash-debug-wrapper-$aleatori.sh 2>> /tmp/caib-dash-debug-wrapper-$aleatori.sh
+stamp=`/bin/date +'%Y%m%d%H%M%S'`
+. $@ >> /tmp/caib-dash-debug-wrapper-$aleatori.sh 2>> /var/log/linuxcaib/caib-dash-debug-wrapper-$(basename $@)-$stamp-$USER-$aleatori.sh

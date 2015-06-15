@@ -14,7 +14,6 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
-
 USER_GID=$(id $USER -gn)
 if [ -f /home/$USER/shutdown-lightdm.txt ];then
         rm /home/$USER/shutdown-lightdm.txt
@@ -38,14 +37,28 @@ cat /var/run/caib-last-logout-user >> /home/$USER/shutdown-lightdm.txt
 logger -t "linuxcaib-lightdm-logout($USER)"  "uid=$(id -u) Feim logout des de lightdm"
 
 if [ "$USER" = "" ];then
+        logger -t "linuxcaib-lightdm-logout($USER)"  "res a fer, és un canvi dins del greeter"        
         exit 0; #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
 fi
 
 
-BASEDIR=$(dirname $0)
+#Ruta base scripts
+BASEDIRPAM=$(dirname $0)
+
+if [ "$(readlink $0)" = "" ];then
+        #no es un enllaç, agafam ruta normal
+        RUTA_FITXER=$(dirname $0)
+        BASEDIR=$RUTA_FITXER
+else
+        RUTA_FITXER=$(readlink $0)
+        BASEDIR=$( dirname $RUTA_FITXER)
+fi
+
+
+#BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-lightdm-logout($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
-        . $BASEDIR/caib-conf-utils.sh
+        . /opt/caib/linuxcaib/caib-conf-utils.sh
 fi
 
 
@@ -66,9 +79,13 @@ if [ "$MZN_SESSION"  = "" ];then
         # No hi ha manera de discriminar si el logout ve de una sessió correcta d'usuari local o d'una contrasenya incorrecta al
         # login del lightdm
         #zenity --notification --timeout=2 --title="Accés a la xarxa intranet (lightdm)"  --text="Sortint de sessió d'usuari local $USER (lightdm)"
+        echo "$stamp caib-lightdm-logout($USER) usuari sense sessió de seycon!" >> /home/$USER/shutdown-lightdm.txt
 else
         logger -t "linuxcaib-lightdm-logout($USER)" "uid=$(id -u) Logout de lightdm de usuari $USER amb sessió de seycon"
         TIMEOUT=5
+        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "" 2>&1 )" != "" ];then
+                ZENITYUNAVAILABLE=true
+        fi
         (
         SEC=$TIMEOUT;
         echo "#Tancant la sessió CAIB...";
@@ -96,15 +113,15 @@ else
         logger -t "linuxcaib-lightdm-logout($USER)" "Unitats de xarxa de l'usuari desmontades"
 
         echo 30
-        echo "#Aturant proxy local"
-        service cntlm stop
-        echo 40
+        echo "Dins del zenity " >> /home/$USER/shutdown-lightdm.txt
         echo "# Fi"
-        ) | /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa(lightdm)" --auto-close --text "Tancant la sessió CAIB."
+        ) | [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa(lightdm)" --auto-close --text "Tancant la sessió CAIB."
         echo "Resultat del zenity $?" >> /home/$USER/shutdown-lightdm.txt
         #Tancament comu de sessió (coses que se poden fer sense ser root!)
         #Fa fora de la barra de progrés anterior perque te la seva propia barra de progres, ja que potser se cridi des de PAM.       
-        . $BASEDIR/caib-aux-logout.sh
+        . /opt/caib/linuxcaib/caib-aux-logout.sh
+        echo "Fi execucio caib-aux-logout $?" >> /home/$USER/shutdown-lightdm.txt
+        echo 
 fi
 export USER_LIGHTDM_LOGOUT_EXECUTAT="S"
 echo "$stamp fi shutdown lightdm" >> /home/$USER/shutdown-lightdm.txt

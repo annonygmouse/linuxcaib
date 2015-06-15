@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# Embolcall del mazinger
+
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
+#Importam les funcions auxiliars
+#Ruta base scripts
+BASEDIR=$(dirname $0)
+if [ "$CAIBCONFUTILS" != "SI" ]; then
+        . /opt/caib/linuxcaib/caib-conf-utils.sh
+fi
+
+case "$1" in
+"start")
+mazinger start -credentials $(carpetaTempMemoria)/""$USER""/""$USER""_caib_credentials_mazinger $HOME/.caib/mazinger.mzn
+;;
+"stop"|"status")
+mazinger $1
+;;
+esac
+

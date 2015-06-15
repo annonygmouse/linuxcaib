@@ -667,7 +667,6 @@ esServImprLinux() {
         #Per ara no tenim servior d'impressió Linux.
         #Quan en tenguem un s'haurà de dir simprlinX
         $(echo $prntSrvr | grep -q simprlin && echo "SI")
-        echo "NO"
 }
 
 

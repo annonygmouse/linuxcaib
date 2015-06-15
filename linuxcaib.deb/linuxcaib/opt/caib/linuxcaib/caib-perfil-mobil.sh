@@ -77,7 +77,13 @@ perfilmontat=$perfilmontat/linux_profile
 
 #Si P: esta montada, agafam rsync-perfil-mobil*.rules de P: així se poden actualitzar les regles remotament
 #Detectam la carpeta P
-PSHARE=$(ls -ad  /media/P_*)
+if [ -d /media/P_pcapplinux/caib/ ];then
+	PSHARE=pcapplinux
+else
+	if [ -d /media/P_pcapp/caib/dissoflinux ];then
+		PSHARE=pcapp
+	fi
+fi
 
 if [ -d /media/P_$PSHARE/caib/linuxcaib/ ];then
         rutaRsyncRules="/media/P_$PSHARE/caib/linuxcaib/conf"

@@ -8,7 +8,8 @@ gsettings set org.gnome.Vino use-alternative-port true
 gsettings set org.gnome.Vino icon-visibility 'client'
 gsettings set org.gnome.Vino use-upnp false
 gsettings set org.gnome.Vino view-only false
-gsettings set org.gnome.Vino prompt-enabled true
+#Deshabilitam l'avís de connexio del vino, ja tenim el nostre.
+gsettings set org.gnome.Vino prompt-enabled false
 gsettings set org.gnome.Vino disable-xdamage true
 gsettings set org.gnome.Vino authentication-methods "['vnc']"
 gsettings set org.gnome.Vino network-interface ''

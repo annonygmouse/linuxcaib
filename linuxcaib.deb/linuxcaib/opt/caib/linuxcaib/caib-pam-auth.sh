@@ -136,8 +136,7 @@ crear_usuari_local () {
                 fi
         else
                 #Usuari ja existeix al sistema
-                NOM_USUARI=$(getent passwd $PAM_USER | cut -d ':' -f 5| cut -d ',' -f 1)
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "Compte d'usuari ja existent al sistema amb nom=$NOM_USUARI"
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "Compte d'usuari ja existent al sistema."
         fi
 
         if [ ! -d /home/$PAM_USER/.caib ];then
@@ -203,7 +202,7 @@ seycon_login () {
 
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "Inici autenticació caib"
-
+logger -t "linuxcaib-pam-auth($USER)" -s "PAM_WINBIND_LOGONSCRIPT=$PAM_WINBIND_LOGONSCRIPT PAM_WINBIND_LOGONSERVER=$PAM_WINBIND_LOGONSERVER PAM_WINBIND_PROFILEPATH=$PAM_WINBIND_PROFILEPATH"
 #Si usuari existeix i te contrasenya local NO es usuari de seycon!
 
 if [ "$PAM_USER" = "" ];then

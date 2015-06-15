@@ -22,12 +22,21 @@ else
         BASEDIR=$( dirname $RUTA_FITXER)
 fi
 
+#BASEDIR=$(dirname $0)
+if [ "$CAIBCONFUTILS" != "SI" ]; then
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-lightdm-logout($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+        #. /opt/caib/linuxcaib/caib-conf-utils.sh
+fi
+
+export PATH=$PATH:/usr/sbin
+
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
 if [ "$DEBUG" -ge 3 ]; then
     # trace output
     set -x
 fi
+
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-lightdm-login($USER)" -s "BASEDIR=$BASEDIR DISPLAY=$DISPLAY"
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-lightdm-login($USER)" -s "entorn: env=$(env)"
@@ -180,7 +189,7 @@ else
 fi
 
 #Definim variables d'entorn TMP i TEMP.
-mkdir /tmp/$USER
+mkdir -p /tmp/$USER
 usrTmpDir=/tmp/$USER
 export TMP=$usrTmpDir
 export TEMP=$usrTmpDir

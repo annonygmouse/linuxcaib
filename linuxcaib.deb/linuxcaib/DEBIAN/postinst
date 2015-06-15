@@ -86,11 +86,11 @@ case "$1" in
 	#Configuram el servidor de temps de la CAIB.
 	if [ -f /etc/ntp.conf ]; then
 		cp /etc/ntp.conf /tmp/install-linuxcaib-backup/
-		TIMESERVER=$(grep -m 1 "^server" /etc/ntp.conf)
-		if [ "$TIMESERVER" != "server timesrv.caib.es" ];then
-		        #Hem d'afegir el timeserver de la CAIB al principi.
-		        sed -i "s/^$TIMESERVER/# Servidor de temps de la CAIB\nserver timesrv.caib.es\n$TIMESERVER/g" /etc/ntp.conf
-		fi
+                TIMESERVER=$(grep -m 1 "^server" /etc/ntp.conf)
+                if [ "$TIMESERVER" != "server timesrv.caib.es" ];then
+                        #Hem d'afegir el timeserver de la CAIB al principi.
+                        sed -i "s/^$TIMESERVER/# Servidor de temps de la CAIB\nserver timesrv.caib.es\n$TIMESERVER/g" /etc/ntp.conf
+                fi
 	else
 		echo "WARNING: no he pogut afegir el servidor de temps de la CAIB"
 		echo "Si l'hora no és correcte no podreu fer login"

@@ -31,6 +31,15 @@
 # detectar si les impressores de xarxa de l'usuari son de HP (hp-makeuri 10.215.3.253)
 # i així emprar sempre el driver de HP ja que son els millors suportats.
 
+#Exemple de resultat avahi
+#=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;Internet Printer;local;ipreinf8.local;10.215.3.253;631;"adminurl=http://ipreinf8.local." "priority=60" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "rp=ipreinf8" "pdl=application/postscript,application/vnd.hp-PCL,application/vnd.hp-PCLXL" "qtotal=1" "txtvers=1"
+
+#=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;PDL Printer;local;ipreinf8.local;10.215.3.253;9100;"adminurl=http://ipreinf8.local." "priority=40" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "pdl=application/postscript,application/vnd.hp-PCL,application/vnd.hp-PCLXL" "qtotal=1" "txtvers=1"
+
+#=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;UNIX Printer;local;ipreinf8.local;10.215.3.253;515;"Binary=T" "Transparent=T" "adminurl=http://ipreinf8.local." "priority=30" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "pdl=application/postscript" "rp=BINPS" "qtotal=4" "txtvers=1"
+
+
+
 #Importam les funcions auxiliars
 #Ruta base scripts
 BASEDIR=$(dirname $0)
@@ -142,7 +151,7 @@ if [ "$(dpkg -l|grep xmlstarlet| grep ^.i)" = "" ]; then
         $SUDO apt-get install xmlstarlet
 fi
 
-if [ "$(wich gethostip)" = "" ]; then
+if [ "$(which gethostip)" = "" ]; then
         logger -t "linuxcaib-conf-printers($USER)" -s "ERROR: cal instalar l'executable 'gethostip', està al paquet syslinux (a partir de ubuntu 14.10 a syslinux-utilsº), ho intent"
         $SUDO apt-get install syslinux syslinux-utils
 fi
@@ -163,10 +172,10 @@ USER_PRINTERS=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --n
 RESULTM=$?
 if [ $RESULTM -eq 0 ];then
    if [ "$DEBUG" -gt "0" ];then
-        logger -t "linuxcaib-conf-printers($USER)" -s  "Descarregades impressores de l'USERNAME"
+        logger -t "linuxcaib-conf-printers($USER)" -s  "Descarregades impressores de l'usuari: $USERNAME"
    fi
 else
-   logger -t "linuxcaib-conf-printers($USER)" -s "ERROR: no he pogut accedir a les impressores de l'USERNAME error: $RESULTM o l'usuari NO te impressores assignades."
+   logger -t "linuxcaib-conf-printers($USER)" -s "ERROR: no he pogut accedir a les impressores de l'usuari $USERNAME error: $RESULTM o l'usuari NO te impressores assignades."
    logger -t "linuxcaib-conf-printers($USER)" -s "resultat: $USER_PRINTERS"
    exit 1;
 fi
@@ -237,7 +246,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                 #dels servidors d'impressio linux (simprlin?)
                 #Si la impressora està a un servidor d'impressió windows, intentarem accedir directament a la impressora.
                 #En cas contrari donarem d'alta la impressora via el servidor cups directament.
-                servImpresioLinux=esServImprLinux $PRINTSERVER
+                servImpresioLinux=$(esServImprLinux $PRINTSERVER)
                 #$(echo $PRINTSERVER | grep -q simprlin && echo linux)
                 if [ "$servImpresioLinux" = "SI" ];then
                         logger -t "linuxcaib-conf-printers($USER)" "Impressora: $PRINTERNAME està al servidor d'impressió $PRINTSERVER Linux (simprlinXXX)"
@@ -267,8 +276,13 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                 # Si no podem detectar la marca i model (i el seu driver), emprarem un driver genèric.
                                 UNIX_PRINTER_MAKE_AND_MODEL=$(cat /tmp/avahi|grep "$PRINTERIP" | grep IPv4 |grep "UNIX Printer" | awk 'BEGIN  { FS=";"} {print $10}'| awk 'BEGIN  { FS="\""} {print $10}'| awk 'BEGIN  { FS="("} {print $2}' | awk 'BEGIN  { FS=")"} {print $1}')
                                 IPP_PRINTER_MAKE_AND_MODEL=$(cat /tmp/avahi| grep "$PRINTERIP" | grep IPv4 |grep "Internet" | awk 'BEGIN  { FS=";"} {print $10}'| awk 'BEGIN  { FS="\""} {print $6}'| awk 'BEGIN  { FS="("} {print $2}' | awk 'BEGIN  { FS=")"} {print $1}')
-                                logger -t "linuxcaib-conf-printers($USER)" -s "Impressora $PRINTERNAME es model; $IPP_PRINTER_MAKE_AND_MODEL."; 
+
+                                logger -t "linuxcaib-conf-printers($USER)" -s "Impressora $PRINTERNAME es model $IPP_PRINTER_MAKE_AND_MODEL."; 
                         
+#jetdirect! PDL_PRINTER_MAKE_AND_MODEL=$(cat /tmp/avahi| grep "$PRINTERIP" | grep IPv4 |grep "PDL Printer" | awk 'BEGIN  { FS=";"} {print $10}'| awk 'BEGIN  { FS="\""} {print $6}'| awk 'BEGIN  { FS="("} {print $2}' | awk 'BEGIN  { FS=")"} {print $1}')
+#hp-makeuri ipreinf8 2>/dev/null|grep CUPS|awk '{ print $3}'
+
+
                                 PRINTER_DRIVER=$DEFAULT_PRINTER_DRIVER #Empram el driver per defecte.
                                 if [ "$IPP_PRINTER_MAKE_AND_MODEL" != "" ];then
                                         PRINTER_TYPE="IPP" 
@@ -296,7 +310,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                 fi
                                         fi
                                 fi
-                                logger -t "linuxcaib-conf-printers($USER)" "Impressora $PRINTERNAME de tipus $PRINTER_TYPE."; 
+                                logger -t "linuxcaib-conf-printers($USER)" "Impressora $PRINTERNAME de tipus $PRINTER_TYPE i driver $PRINTER_DRIVER."; 
                         
                                 case "$PRINTER_TYPE" in
                                             "IPP")
@@ -309,7 +323,8 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                         logger -t "linuxcaib-conf-printers($USER)" "Impressora JA configurada, simplement ens asseguram que l'usuari hi pugui imprimir."
                                                         $SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME 
                                                 else
-                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v ipp://$PRINTERNAME/ipp -E -m $PRINTER_DRIVER o printer-is-shared=false > /dev/null)
+                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v ipp://$PRINTERNAME/ipp -E -m $PRINTER_DRIVER -o printer-is-shared=false )
+                                                        
                                                         #TERROR: system-config-printer NO agafa les opcions definides... (excepte habilitació de duplex)
                                                         $SUDO lpadmin -p $PRINTERNAME $DEFAULT_PRINTER_OPTIONS > /dev/null
                                                 fi
@@ -341,7 +356,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                 logger -t "linuxcaib-conf-printers($USER)" -s "Impressora $PRINTERNAME de tipus desconegut."; 
                                                 ;;
                                 esac
-                               
+                                logger -t "linuxcaib-conf-printers($USER)" -s " Resultat afegir impressora=$resultAddPrinter";
                                 #Verificar que sa impressora estigui ben configurada:
                                 if ( $(LANG=C lpstat -p $PRINTERNAME -l|grep -q enabled) ); then 
                                         logger -t "linuxcaib-conf-printers($USER)" -s "Impressora $PRINTERNAME -$PRINTER_MAKE_AND_MODEL- afegida amb driver $PRINTER_DRIVER."; 
