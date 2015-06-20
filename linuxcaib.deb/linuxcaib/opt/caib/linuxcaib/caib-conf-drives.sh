@@ -104,7 +104,7 @@ if [ $RESULTM -eq 0 ];then
 else
 
         if [ $RESULTM -eq 32 ];then
-                logger -t "linuxcaib-conf-drives($USER)" -s "Error en montar: $MOUNTOUTPUT"                
+                logger -t "linuxcaib-conf-drives($USER)" -s "Error ($RESULTM) en montar: $MOUNTOUTPUT"                
                 logger -t "linuxcaib-conf-drives($USER)" -s "Si l'error és: \"Permission denied\" és que la contrasenya no és vàlida o l'usuari està bloquejat, telefonau al 77070 per a que vos desbloquegin l'usuari"
                 logger -t "linuxcaib-conf-drives($USER)" -s "Si l'error és: \"Device or resource busy\" és que a aquest punt ja hi ha algun dispositiu montat"
         else
@@ -114,7 +114,7 @@ else
                 logger -t "linuxcaib-conf-drives($USER)" -s "Parametres:"
                 logger -t "linuxcaib-conf-drives($USER)" -s "Usuari seycon $usuariSeycon"
                 logger -t "linuxcaib-conf-drives($USER)" -s "Unitat compartida SMB $unitatCompartida"
-                logger -t "linuxcaib-conf-drives($USER)" -s "Password $password"
+                [ "$DEBUG" -gt "2" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Password $password"
                 logger -t "linuxcaib-conf-drives($USER)" -s "Punt montatge al filesystem $puntMontatge"
                 logger -t "linuxcaib-conf-drives($USER)" -s "execucio: sudo mount -t cifs $unitatCompartida $puntMontatge  -o iocharset=utf8,rw,username=$usuariSeycon,password=$password,file_mode=0777,dir_mode=0777,nobrl"
         fi
@@ -268,6 +268,8 @@ if [ $RESULTM -eq 0 ];then
                         logger -t "linuxcaib-conf-drives($USER)" -s "Error montant unitat perfil"
                         logger -t "linuxcaib-conf-drives($USER)" -s "RESULT=$RESULT"                
                         logger -t "linuxcaib-conf-drives($USER)" -s "RESULTM=$RESULTM"
+                        echo "# Error montant unitat perfil!!! "; sleep 10;
+                     
                 else
                         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Perfil montat: $RESULTM"
                 fi

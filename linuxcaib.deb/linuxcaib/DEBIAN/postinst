@@ -28,6 +28,7 @@ case "$1" in
 		mkdir /tmp/install-linuxcaib-backup/
 	fi
 
+	[ -f /etc/nsswitch.conf ] && cp /etc/nsswitch.conf /tmp/install-linuxcaib-backup/
 	[ -f /etc/lightdm/lightdm.conf ] && cp /etc/lightdm/lightdm.conf /tmp/install-linuxcaib-backup/
 	[ -d /etc/pam.d/common-auth ] && cp /etc/pam.d/common* /tmp/install-linuxcaib-backup/
 	[ -f /usr/share/pam-configs/unix ] && cp /usr/share/pam-configs/unix /tmp/install-linuxcaib-backup/
@@ -307,6 +308,21 @@ case "$1" in
 
 	#Eliminam fitxers temporals
 	rm -fr /tmp/install-linuxcaib-backup/
+
+        #Modificam nsswitch per a que empri winbind!
+        #passwd:         files winbind
+        if ( grep ^passwd: /etc/nsswitch.conf|grep -q -v winbind );then
+                echo "No hi ha winbind definit a passwd";
+                passwd=$(grep ^passwd: /etc/nsswitch.conf);
+                sed -i "s/$passwd/$passwd winbind/" /etc/nsswitch.conf
+        fi
+        #group:          files winbind
+        if ( grep ^group: /etc/nsswitch.conf|grep -q -v winbind );then
+                echo "No hi ha winbind definit a group";
+                group=$(grep ^group: /etc/nsswitch.conf);
+                sed -i "s/$group/$group winbind/" /etc/nsswitch.conf
+        fi
+
 
 	#Reiniciam samba
 	set +e 

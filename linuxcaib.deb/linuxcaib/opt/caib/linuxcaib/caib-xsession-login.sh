@@ -89,6 +89,7 @@ echo "10" ; echo "# Detectant entorn" ;sleep $SLEEP
 dash /opt/caib/linuxcaib/caib-conf-entorn-xsession.sh; 
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-xsession-login($USER)" "Detectant entorn ha tornat error!"
+        forceLogout=true
 fi
 
 echo "15" ; echo "# Configurant Office" ;sleep $SLEEP
@@ -167,6 +168,10 @@ echo "#Fi"
 echo "100" ; sleep $SLEEP
 ) | /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --percentage=0  --auto-close --text "Accés a la xarxa corporativa"
 
+if [ "$forceLogout" = true ];then
+        /usr/bin/zenity  --error --title="Accés a la xarxa corporativa" --text="S'ha produit un error que impedeix iniciar sessió.\n\n Telefonau al vostre CAU."
+        exit 1;
+fi
 #Forçam la càrrega del .profile_caib_proxy per definir les variables d'entorn PROXY fora del bucle de zenity per a que inicialment la sessió X tengui les variables d'entorn del proxy.
 #Posteriorment el bash llegirà .profile
 #Carregam les variables d'entorn a l'escript actual.

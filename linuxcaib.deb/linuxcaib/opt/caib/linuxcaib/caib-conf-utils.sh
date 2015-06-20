@@ -86,6 +86,104 @@ fi
 }
 
 
+
+
+#Consulta dades del seycon
+#Si troba la url dins la cache de l'usuari, empra la de cache
+#en cas contrari, se connecta al seycon amb les credencials de l'usuari per descarregar-se
+#les dades de la URL i les desa en cache
+
+SeyconQuery() {
+        USERNAME=$(grep -i "^username=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        PASSWORD=$(grep -i "^password=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        URL=$1
+        URLCACHE=$(echo $URL|sed 's/\//_/g')
+        SEYCON_SERVER=$(cat $BASEDIR/conf/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat $BASEDIR/conf/SSOServer)
+ 
+#        SEYCON_SERVER="sticlin2.caib.es"
+#        SEYCON_SERVERS="sticlin2.caib.es,stsmlin3.caib.es"
+
+        # S'ha de posar el resultat din SEYCON_ANSWER
+        SEYCON_ANSWER=""        
+        SEYCON_ANSWERED="N"
+
+        #Primer miram si ho tenim en cache
+        SEYCON_ANSWER=$(cat /tmp/$USER/$URLCACHE)
+        if [ "$SEYCON_ANSWER" != "" ];then
+                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Emprant resposta en cache de /tmp/$USER/$URLCACHE"
+                return
+        else
+                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Url no en cache, la davallarem del servidor"
+        fi
+
+        #Bucle amb els servidors, el primer servidor que va be fa sortir del bucle. 
+        for SEYCON_SERVER in $(echo $SEYCON_SERVERS |sed "s/,/ /g");do
+                SEYCON_ANSWER=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate "https://$SEYCON_SERVER:$SEYCON_PORT/query/$URL" )
+                RESULTM=$?
+                
+                #Tractam el "return codes" de wget                        
+#        0   No problems occurred.
+#       1   Generic error code.
+#       2   Parse error---for instance, when parsing command-line options, the .wgetrc or .netrc...
+#       3   File I/O error.
+#       4   Network failure.
+#       5   SSL verification failure.
+#       6   Username/password authentication failure.
+#       7   Protocol errors.
+#       8   Server issued an error response.
+                case "$RESULTM" in
+                        "0")
+                                #Ha anat bé, torn el valor
+                                SEYCON_ANSWERED="S"
+                                echo "Surt del for"
+                                break
+                        ;;
+                        "4")
+                                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: ERROR de xarxa."
+                        ;;
+                        "5")
+                                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: ERROR de SSL."
+                        ;;
+                        "6")
+                                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: ERROR: Usuari/password incorrectes."
+                        ;;
+                        "8")
+                                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: ERROR el servidor ha tornar un missatge d'error intern."
+                        ;;
+                esac
+                logger -t "linuxcaib-conf-utils($USERNAME)" -s "SeyconQuery: ERROR: no he pogut accedir al seycon amb l'usuari $USERNAME. URL emprada: https://$SEYCON_SERVER:$SEYCON_PORT/query/$URL wget ha tornat codi=$RESULTM, i la resposta http ha estat: $(echo $SEYCON_ANSWER| awk '{print substr($0,0,15)"..."}')"
+        done
+         if [ "$SEYCON_ANSWERED" = "S" ];then
+                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Resposta seycon: "$SEYCON_ANSWER
+                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Desant el resultat dins /tmp/$USER/$URLCACHE"
+                echo $SEYCON_ANSWER > /tmp/$USER/$URLCACHE
+        else
+                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: UNAVAILABLE"
+        fi  
+}
+
+#URL
+#Etiqueta
+getSeyconCol() {
+        URL=$1
+        ETIQUETA=$2
+        SeyconQuery $URL
+        SEYCON_ANSWER=$(cat /tmp/$USER/$URLCACHE)
+        if [ "$SEYCON_ANSWER" = "" ];then
+                echo "getSeyconCol ERROR en obtenir la url $URL"
+        else
+                echo "Resposta seycon: "$SEYCON_ANSWER
+                echo "Processant etiqueta:"
+                xpath="data/row[1]/$ETIQUETA"
+                valorEtiqueta=$(echo $SEYCON_ANSWER | xmlstarlet sel -T -t -c $xpath )
+                echo "Valor $ETIQUETA = $valorEtiqueta"
+        fi  
+}
+
+
+
+
 #EN PROCES 
 #Funció que interactua amb el seycon. Li passam una URL i torna el resultat
 #Parametres:
@@ -149,6 +247,7 @@ getSeyconUrl() {
                 echo "UNAVAILABLE"
         fi        
 }
+
 
 
 #Mira si el host passat esta a una xarxa normalitzada.

@@ -68,6 +68,8 @@ perfilmontat="/media/$USER/.unitat_perfil"
 if [ $(/bin/df -P  | grep unitat_perfil | grep -v unitat_P | awk 'BEGIN  { FS=" "} {print $6}') != "$perfilmontat" ];then
         logger -t "linuxcaib-perfil-mobil($USER)" "ERROR: unitat del perfil NO montada a $perfilmontat"
         return 1;
+else
+        logger -t "linuxcaib-perfil-mobil($USER)" "Unitat del perfil mobil montada a $perfilmontat"
 fi
 
 if [ ! -d $perfilmontat/perfil-linux ];then
