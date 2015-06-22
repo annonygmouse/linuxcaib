@@ -7,7 +7,7 @@
 
 BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
-        logger -t "linuxcaib-conf-entorn($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+        logger -t "linuxcaib-conf-entorn-xsession($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
         . $BASEDIR/caib-conf-utils.sh
 fi
 
@@ -35,7 +35,7 @@ fi
 #Miram si pot crear fitxers dins del seu HOME de filesystem
 result_mkfile=$(mktemp -p $HOME)
 if [ $? -eq 0 ];then
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn($USER)" "Usuari pot crear fitxer dins el seu home"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn-xsession($USER)" "Usuari pot crear fitxer dins el seu home"
         rm -fr $result_mkfile;
 else
         logger -t "linuxcaib-conf-entorn-xsession($USER)" "ERROR: Usuari NO pot crear fitxer dins el seu home"
@@ -58,7 +58,7 @@ fi
 
 if [ ! -f /etc/caib/linuxcaib/allowKerberosUsers ];then
         if [ "$(id |grep "domain users")" = "" ];then
-                logger -t "linuxcaib-conf-entorn-xsession($USER)" "ALERTA: Usuari NO te ID de active directory! Potser ja tengui usuari local creat? O accés només via kerberos"
+                logger -t "linuxcaib-conf-entorn-xsession($USER)" "ALERTA: Usuari NO te ID de active directory! Potser ja tengui usuari local creat? O no s'ha fet login mitjançant winbind, sinó només via kerberos. Potser no hi hagi winbind dins /etc/nsswitch."
                 /usr/bin/zenity --timeout 10  --error --title="Accés a la xarxa corporativa" --text="ALERTA: Usuari NO te ID de active directory! No continuam."
                 exit 1;
         fi
