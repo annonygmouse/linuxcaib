@@ -7,7 +7,7 @@
 
 BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
-        logger -t "linuxcaib-conf-entorn($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+        logger -t "linuxcaib-conf-entorn-lightdm($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
         . $BASEDIR/caib-conf-utils.sh
 fi
 

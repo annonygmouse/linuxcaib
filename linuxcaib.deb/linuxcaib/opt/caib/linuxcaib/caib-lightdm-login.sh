@@ -122,6 +122,7 @@ echo "10" ; echo "# Detectant entorn" ;sleep $SLEEP
 dash /opt/caib/linuxcaib/caib-conf-entorn-lightdm.sh; 
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-lightdm-login($USER)" "Detectant entorn ha tornat error!"
+        forceLogout=true
 	exit 1;
 fi
 
@@ -152,7 +153,11 @@ fi
 echo "100";
 ) | /usr/bin/zenity  --progress --title="Accés a la xarxa corporativa(lightdm)" --text="Iniciant sessió...." --percentage=0 --no-cancel --auto-close 
 
-  
+if [ "$forceLogout" = true ];then
+        /usr/bin/zenity  --error --title="Accés a la xarxa corporativa" --text="S'ha produit un error que impedeix iniciar sessió.\n\n Telefonau al vostre CAU."
+        exit 1;
+fi  
+
 #Així si l'usuari cancela (ESC), no deixa entrar en sessió
 resultCode=$?
 if [ "$resultCode" != "0" ];then

@@ -13,7 +13,7 @@ if [ -z $LANG ]; then
         export LANG=C.UTF-8
 fi
 
-logger -t "linuxcaib-xsession-89caib($USER)"  "uid=$(id -u) Feim login de XSession"
+logger -t "linuxcaib-xsession-89caib($USER)"  "uid=$(id -u) Feim login de XSession (home=$HOME)"
 
 #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
 if [ "$USER" != "" ];then
