@@ -7,7 +7,7 @@ if [ ! $(id -u) -eq 0 ];then
         SUDO="sudo "
 fi
 
-$SUDO grep caib- /var/log/syslog > $logFile
+$SUDO grep caib- /var/log/syslog*|sort > $logFile
 
 if [ -z $DISPLAY ];then
         echo "Exportats els logs de linuxcaib a $logFile"

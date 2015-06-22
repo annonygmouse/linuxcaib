@@ -139,7 +139,7 @@ fi
                 if [ "$USER_SEYCON_SESSION" = "$SESSION_ID" ];then
                         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USERNAME)" "INFO: Sessió del seycon i sessió del mazinger iguals -$USER_SEYCON_SESSION-"
                 else
-                        logger -t "linuxcaib-conf-seyconsession($USERNAME)" "WARNING: Sessió del seycon i sessió del mazinger NO iguals -$USER_SEYCON_SESSION-"
+                        logger -t "linuxcaib-conf-seyconsession($USERNAME)" "INFO: Sessió del seycon i sessió del mazinger NO iguals $USER_SEYCON_SESSION-$SESSION_ID"
                 fi
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USERNAME)" "DEBUG: createSession result= $USER_SESSION"
                 if [ $( echo $USER_SESSION | cut -f 1 -d "|" ) = "OK" ];then        

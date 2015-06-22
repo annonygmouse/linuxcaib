@@ -89,6 +89,7 @@ echo "10" ; echo "# Detectant entorn" ;sleep $SLEEP
 dash /opt/caib/linuxcaib/caib-conf-entorn-xsession.sh; 
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-xsession-login($USER)" "Detectant entorn ha tornat error!"
+        exit 1;
 fi
 
 echo "15" ; echo "# Configurant Office" ;sleep $SLEEP
