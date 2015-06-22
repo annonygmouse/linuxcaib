@@ -45,7 +45,7 @@ else
 fi
 if [ -r $pcapp_drive/caib/tcllinux/caib-vnc-server.tcl ];then 
         logger -t "linuxcaib-vnc-server($USER)" -s "arrancant: $pcapp_drive/caib/tcllinux/caib-vnc-server.tcl amb parametre: $1"
-        wish $pcapp_drive/caib/tcllinux/caib-vnc-server.tcl $1
+        nohup wish $pcapp_drive/caib/tcllinux/caib-vnc-server.tcl $1 &
         gsettings set org.gnome.Vino enabled false
         logger -t "linuxcaib-vnc-server($USER)" -s "servidor vnc aturat"
 else

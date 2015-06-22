@@ -24,11 +24,11 @@ fi
 #Miram si pot crear carpetes dins del seu HOME de filesystem
 result_mkdir=$(mktemp -d -p $HOME)
 if [ $? -eq 0 ];then
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn($USER)" "Usuari pot crear carpetes dins el seu home ($result_mkdir)"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn-xsession($USER)" "Usuari pot crear carpetes dins el seu home ($result_mkdir)"
         rm -fr $result_mkdir 
         
 else
-        logger -t "linuxcaib-conf-entorn($USER)" "ERROR: Usuari NO pot crear carpetes dins el seu home"
+        logger -t "linuxcaib-conf-entorn-xsession($USER)" "ERROR: Usuari NO pot crear carpetes dins el seu home"
         /usr/bin/zenity  --error --title="Accés a la xarxa corporativa" --text="ERROR: No podeu crear carpetes vostre HOME\n\nNo podeu entrar a aquest equip.\n\n Telefonau al vostre CAU."
 fi
 
@@ -38,7 +38,7 @@ if [ $? -eq 0 ];then
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn($USER)" "Usuari pot crear fitxer dins el seu home"
         rm -fr $result_mkfile;
 else
-        logger -t "linuxcaib-conf-entorn($USER)" "ERROR: Usuari NO pot crear fitxer dins el seu home"
+        logger -t "linuxcaib-conf-entorn-xsession($USER)" "ERROR: Usuari NO pot crear fitxer dins el seu home"
         /usr/bin/zenity --timeout 20  --error --title="Accés a la xarxa corporativa" --text="ERROR: No podeu crear fitxers al vostre HOME.\n\nNo podeu entrar a aquest equip.\n\n Telefonau al vostre CAU." 
         exit 1;
 fi
@@ -46,10 +46,10 @@ fi
 #Miram si pot crear fitxers dins la carpeta temporal
 result_mkfile=$(mktemp -p /tmp )
 if [ "$?" = "0" ];then
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn($USER)" "Usuari pot crear carpetes dins la carpeta /tmp ($result_mkdir)"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-entorn-xsession($USER)" "Usuari pot crear carpetes dins la carpeta /tmp ($result_mkdir)"
         rm -fr $result_mkdir       
 else
-        logger -t "linuxcaib-conf-entorn($USER)" "ERROR: Usuari NO pot crear fitxer dins la carpeta temporal"
+        logger -t "linuxcaib-conf-entorn-xsession($USER)" "ERROR: Usuari NO pot crear fitxer dins la carpeta temporal"
         /usr/bin/zenity --timeout 20  --error --title="Accés a la xarxa corporativa" --text="ERROR: No podeu crear fitxers a la carpeta temporal (/tmp).\n\nNo podeu entrar a aquest equip.\n\n Telefonau al vostre CAU." 
         exit 1;
 fi
@@ -58,7 +58,7 @@ fi
 
 if [ ! -f /etc/caib/linuxcaib/allowKerberosUsers ];then
         if [ "$(id |grep "domain users")" = "" ];then
-                logger -t "linuxcaib-conf-entorn($USER)" "ALERTA: Usuari NO te ID de active directory! Potser ja tengui usuari local creat? O accés només via kerberos"
+                logger -t "linuxcaib-conf-entorn-xsession($USER)" "ALERTA: Usuari NO te ID de active directory! Potser ja tengui usuari local creat? O accés només via kerberos"
                 /usr/bin/zenity --timeout 10  --error --title="Accés a la xarxa corporativa" --text="ALERTA: Usuari NO te ID de active directory! No continuam."
                 exit 1;
         fi

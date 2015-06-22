@@ -24,7 +24,7 @@ fi
 
 #BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-lightdm-logout($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-lightdm-login($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
         #. /opt/caib/linuxcaib/caib-conf-utils.sh
 fi
 
@@ -190,6 +190,7 @@ fi
 
 #Definim variables d'entorn TMP i TEMP.
 mkdir -p /tmp/$USER
+chown $USER:$USER /tmp/$USER
 usrTmpDir=/tmp/$USER
 export TMP=$usrTmpDir
 export TEMP=$usrTmpDir

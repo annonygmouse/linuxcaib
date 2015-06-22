@@ -2,5 +2,5 @@
 
 #Aixecam el servidor vnc de l'usuari alternatiu (x11vnc)
 
-caib-vnc 2
+nohup caib-vnc 2 &
 

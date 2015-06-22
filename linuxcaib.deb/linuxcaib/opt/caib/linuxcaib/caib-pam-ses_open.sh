@@ -97,7 +97,7 @@ case "$PAM_SERVICE" in
         #zenity --height=300 --timeout 3 --info --title=" 0.0 "  --text="\n\n\n\n0\n\n\n\nAquest dialeg se tancara en 3 segons"
 
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-ses_open($PAM_SERVICE-$PAM_USER)" "Rés a fer per ara"
-        if [ "$(cat $HOME/.caib/MZN_SESSION 2> /dev/null)" != "" ];then        
+        if [ "$(cat /home/$PAM_USER/.caib/MZN_SESSION 2> /dev/null)" != "" ];then        
                 arrancar_seycon_session_daemon
         else
                 logger -t "linuxcaib-pam-ses_open($PAM_SERVICE-$PAM_USER)" "Usuari local"        
