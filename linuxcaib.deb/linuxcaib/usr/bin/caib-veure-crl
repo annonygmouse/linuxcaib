@@ -3,9 +3,22 @@
 #Per paràmetre, la URL de la CRL
 
 if [ -z $1 ];then
-	echo "El paràmetre ha de ser la URL de la CRL"
+	echo "El paràmetre ha de ser la URL de la CRL o un fitxer on hi hagi la CRL descarregada"
 	exit 1;
 fi
 
-wget -q --no-check-certificate -O -  $1   | openssl crl -inform DER -text -noout
+#http://www.cert.fnmt.es/crls/ARLFNMTRCM.crl
+
+#wget -q --no-check-certificate -O -  $1   | openssl crl -inform DER -text -noout
+
+
+case "$( echo $1| awk -F : '{ print $1}')" in
+        "http"|"https")
+                wget -q --no-check-certificate -O -  $1   | openssl crl -inform DER -text -noout;
+        ;;
+        *)
+                cat "$1"   | openssl crl -inform DER -text -noout;
+        ;;
+esac
+
 

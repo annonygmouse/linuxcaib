@@ -12,4 +12,5 @@
 
 #A Unity això no es pot fer per disseny.
 
-#Això no funciona, diu que l'schema no existeix! gsettings set org.gnome.gnome-panel.layout.objects.window-list-0.instance-config group-windows 'never-group'
+#Això no funciona, diu que l'schema no existeix! 
+#gsettings set org.gnome.gnome-panel.layout.objects.window-list-0.instance-config group-windows 'never-group'

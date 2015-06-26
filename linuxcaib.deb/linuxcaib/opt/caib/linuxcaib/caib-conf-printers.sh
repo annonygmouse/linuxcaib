@@ -40,13 +40,7 @@
 
 
 
-#Importam les funcions auxiliars
-#Ruta base scripts
-BASEDIR=$(dirname $0)
-if [ "$CAIBCONFUTILS" != "SI" ]; then
-logger -t "linuxcaib-login-printers($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
-. $BASEDIR/caib-conf-utils.sh
-fi
+
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
@@ -55,10 +49,21 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
+
+
 if [ -f /etc/caib/linuxcaib/disableconfprinters ];then
         logger -t "linuxcaib-login-printers($USER)" "Configuració de impressores deshabilitatda! (/etc/caib/linuxcaib/disableconfprinters)"
         exit 1;
 fi
+
+#Importam les funcions auxiliars
+#Ruta base scripts
+BASEDIR=$(dirname $0)
+if [ "$CAIBCONFUTILS" != "SI" ]; then
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-printers($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+. $BASEDIR/caib-conf-utils.sh
+fi
+
 
 #Aplicacions pre-requerides
 #if ( ! paquetInstalat "printer-driver-all" ); then
