@@ -26,7 +26,7 @@ if [ "$CAIBCONFUTILS" != "SI" ]; then
         . $BASEDIR/caib-conf-utils.sh
 fi
 
-
+ZENITYUNAVAILABLE=false
 MZN_SESSION=$(cat $HOME/.caib./MZN_SESSION)
 if [ "$MZN_SESSION"  = "" ];then
         #Si no hi ha sessió de SEYCON/Mazinger significa que esteim desconnectats de la xarxa i no hem de fer res!
@@ -40,6 +40,9 @@ if [ "$MZN_SESSION"  = "" ];then
 else
         logger -t "linuxcaib-xsession-logout($USER)" "uid=$(id -u) Logout de xsession de usuari $USER amb sessió de seycon"
         export LANG=C.UTF-8
+        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "comprovant zenity..." 2>&1 | grep -v warning)" != "" ];then
+                ZENITYUNAVAILABLE=true
+        fi
         TIMEOUT=5
         (
         SEC=$TIMEOUT;
@@ -55,12 +58,9 @@ else
                 sleep 0.5
         done;
         logger -t "linuxcaib-xsession-logout($USER)" "Unitats de xarxa de l'usuari desmontades"
-        echo "#Aturant proxy local"
-        service cntlm stop
         echo 30
         echo "# Fi"
-        ) | /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --auto-close --text "Tancant la sessió CAIB."
-
+        ) | ( [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --auto-close --text "Tancant la sessió CAIB." )
         #Tancament comu de sessió (coses que se poden fer sense ser root!)
         #Fa fora de la barra de progrés anterior perque te la seva propia barra de progres, ja que potser se cridi des de PAM.       
         . $BASEDIR/caib-aux-logout.sh

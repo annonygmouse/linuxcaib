@@ -46,7 +46,7 @@ CAIBCONFUTILS="SI" #Per saber si s'ha carregat aquest fitxer
 #Si no esteim executant amb permissos de root, haurem d'emprar sudo per executar les comandes administratives.
 if [ ! $(id -u) -eq 0 ];then
         SUDO="sudo "
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "Usuari no té id=0, definim variable SUDO per poder executar amb permissos d'administrador"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "Usuari no té id=0 (id=$(id -u)), definim variable SUDO per poder executar amb permissos d'administrador"
 fi
 
 

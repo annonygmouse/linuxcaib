@@ -69,7 +69,7 @@ fi
 if [ "$USER" = "" ] || [ "$USER" = "lightdm" ];then
         exit 0; #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
 fi
-
+ZENITYUNAVAILABLE=false
 logger -t "linuxcaib-lightdm-logout($USER)" "Usuari $USER amb entorn: $(env) i variables $(set | awk -F '=' '! /^[0-9A-Z_a-z]+=/ {exit} {print $1}') "
 MZN_SESSION=$(cat $HOME/.caib/MZN_SESSION)
 if [ "$MZN_SESSION"  = "" ];then
@@ -83,7 +83,8 @@ if [ "$MZN_SESSION"  = "" ];then
 else
         logger -t "linuxcaib-lightdm-logout($USER)" "uid=$(id -u) Logout de lightdm de usuari $USER amb sessió de seycon"
         TIMEOUT=5
-        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "" 2>&1 )" != "" ];then
+        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "comprovant zenity..." 2>&1 | grep -v warning)" != "" ];then
+                logger -t "linuxcaib-lightdm-logout($USER)" "zenity no està disponible!"
                 ZENITYUNAVAILABLE=true
         fi
         (
@@ -115,7 +116,7 @@ else
         echo 30
         echo "Dins del zenity " >> /home/$USER/shutdown-lightdm.txt
         echo "# Fi"
-        ) | [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa(lightdm)" --auto-close --text "Tancant la sessió CAIB."
+        ) | ( [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa(lightdm)" --auto-close --text "Tancant la sessió CAIB." )
         echo "Resultat del zenity $?" >> /home/$USER/shutdown-lightdm.txt
         #Tancament comu de sessió (coses que se poden fer sense ser root!)
         #Fa fora de la barra de progrés anterior perque te la seva propia barra de progres, ja que potser se cridi des de PAM.       
