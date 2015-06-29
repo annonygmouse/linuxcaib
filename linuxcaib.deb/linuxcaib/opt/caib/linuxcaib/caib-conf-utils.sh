@@ -46,9 +46,8 @@ CAIBCONFUTILS="SI" #Per saber si s'ha carregat aquest fitxer
 #Si no esteim executant amb permissos de root, haurem d'emprar sudo per executar les comandes administratives.
 if [ ! $(id -u) -eq 0 ];then
         SUDO="sudo "
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "Usuari no té id=0, definim variable SUDO per poder executar amb permissos d'administrador"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "Usuari no té id=0 (id=$(id -u)), definim variable SUDO per poder executar amb permissos d'administrador"
 fi
-
 
 
 
@@ -95,8 +94,8 @@ fi
 #les dades de la URL i les desa en cache
 
 SeyconQuery() {
-        USERNAME=$(grep -i "^username=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        #USERNAME=$(grep -i "^username=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        #PASSWORD=$(grep -i "^password=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         URL=$1
         URLCACHE=$(echo $URL|sed 's/\//_/g')
         SEYCON_SERVER=$(cat $BASEDIR/conf/SSOServer|cut -d"," -f 1)
@@ -112,15 +111,15 @@ SeyconQuery() {
         #Primer miram si ho tenim en cache
         SEYCON_ANSWER=$(cat /tmp/$USER/$URLCACHE)
         if [ "$SEYCON_ANSWER" != "" ];then
-                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Emprant resposta en cache de /tmp/$USER/$URLCACHE"
+                logger -t "linuxcaib-conf-utils($seyconSessionUser)" "SeyconQuery: Emprant resposta en cache de /tmp/$USER/$URLCACHE"
                 return
         else
-                logger -t "linuxcaib-conf-utils($USERNAME)" "SeyconQuery: Url no en cache, la davallarem del servidor"
+                logger -t "linuxcaib-conf-utils($seyconSessionUser)" "SeyconQuery: Url no en cache, la davallarem del servidor"
         fi
 
         #Bucle amb els servidors, el primer servidor que va be fa sortir del bucle. 
         for SEYCON_SERVER in $(echo $SEYCON_SERVERS |sed "s/,/ /g");do
-                SEYCON_ANSWER=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate "https://$SEYCON_SERVER:$SEYCON_PORT/query/$URL" )
+                SEYCON_ANSWER=$(wget -O - -q --http-user=$seyconSessionUser --http-password=$seyconSessionPassword --no-check-certificate "https://$SEYCON_SERVER:$SEYCON_PORT/query/$URL" )
                 RESULTM=$?
                 
                 #Tractam el "return codes" de wget                        
@@ -639,6 +638,7 @@ EOF
 } #Fi crear_fitxers_credencials
 
 
+
 #Funció que enllaça els fitxers de credencials de la carpeta
 #temporal a la carpeta del home.
 #param1: carpeta temporal on hi ha els fitxers de credencials
@@ -903,8 +903,21 @@ fi
 }
 
 
-
 #TODO: replicar les utilitats de vitalinux (vx-utils): https://github.com/vitalinux/vx-utils/tree/master/usr/bin
 
+#Si no existeix la variable "USER" miram d'emprar "PAM_USER"
+if [ -z $USER ];then
+        if [ ! -z $PAM_USER ];then
+                [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "emprant USER=PAM_USER"
+                USER=$PAM_USER
+        fi
+fi
+
+#Variable que conté el codi d'usuari de la sessió de seycon (agafat del fitxer "credentials" creat pel PAM.
+seyconSessionUser=$(grep -i "^username=" $(carpetaTempMemoria)"/"$USER"/"$USER""_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionUser=$seyconSessionUser"
+#Variable que conté la contrasenya de la sessió de seycon (agafat del fitxer "credentials" creat pel PAM.
+seyconSessionPassword=$(grep -i "^password=" $(carpetaTempMemoria)/$USER/$USER""_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionPassword=$seyconSessionPassword"
 
 

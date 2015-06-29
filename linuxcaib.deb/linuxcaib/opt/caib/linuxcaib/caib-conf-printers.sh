@@ -40,13 +40,7 @@
 
 
 
-#Importam les funcions auxiliars
-#Ruta base scripts
-BASEDIR=$(dirname $0)
-if [ "$CAIBCONFUTILS" != "SI" ]; then
-logger -t "linuxcaib-login-printers($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
-. $BASEDIR/caib-conf-utils.sh
-fi
+
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
@@ -55,10 +49,21 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
+
+
 if [ -f /etc/caib/linuxcaib/disableconfprinters ];then
         logger -t "linuxcaib-login-printers($USER)" "Configuració de impressores deshabilitatda! (/etc/caib/linuxcaib/disableconfprinters)"
         exit 1;
 fi
+
+#Importam les funcions auxiliars
+#Ruta base scripts
+BASEDIR=$(dirname $0)
+if [ "$CAIBCONFUTILS" != "SI" ]; then
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-printers($USER)" "Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+. $BASEDIR/caib-conf-utils.sh
+fi
+
 
 #Aplicacions pre-requerides
 #if ( ! paquetInstalat "printer-driver-all" ); then
@@ -109,8 +114,14 @@ while getopts "hcv?u:p:" opt; do
         exit 0
         ;;
     c)
-        USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")        
+        if [ "$seyconSessionUser" != "" ];then
+                USERNAME=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi        
         ;;
     v)  DEBUG=1
         ;;
@@ -216,9 +227,11 @@ if [ "$NUM_PRINTERS" -gt "$MAX_IMPRESSORES" ];then
 fi
 
 if [ $RESULTM -eq 0 ];then
-        logger -t "linuxcaib-conf-printers($USER)" "num impressores=$NUM_PRINTERS"
+        logger -t "linuxcaib-conf-printers($USER)" "num impressores a configurar: $NUM_PRINTERS"
 fi
 
+
+logger -t "linuxcaib-conf-printers($USER)" "Estat impressores: $(lpstat  -a)"
 
 avahiCache=""
 if [ $NUM_PRINTERS -gt 0 ];then
@@ -326,7 +339,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                         resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v ipp://$PRINTERNAME/ipp -E -m $PRINTER_DRIVER -o printer-is-shared=false )
                                                         
                                                         #TERROR: system-config-printer NO agafa les opcions definides... (excepte habilitació de duplex)
-                                                        $SUDO lpadmin -p $PRINTERNAME $DEFAULT_PRINTER_OPTIONS > /dev/null
+                                                        resultAddPrinter=$resultAddPrinter"$($SUDO lpadmin -p $PRINTERNAME $DEFAULT_PRINTER_OPTIONS)"
                                                 fi
                                                 ;;
                                             "LPD")
@@ -335,7 +348,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                         logger -t "linuxcaib-conf-printers($USER)" "Impressora JA configurada, simplement ens asseguram que l'usuari hi pugui imprimir.".
                                                         $SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME 
                                                 else
-                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v  lpd://$PRINTERNAME/ -E -m $PRINTER_DRIVER -o printer-is-shared=false > /dev/null)
+                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v  lpd://$PRINTERNAME/ -E -m $PRINTER_DRIVER -o printer-is-shared=false)
                                                         #ERROR: system-config-printer NO agafa les opcions definides... (excepte habilitació de duplex)
                                                         $SUDO lpadmin -p $PRINTERNAME $DEFAULT_PRINTER_OPTIONS > /dev/null
                                                 fi
@@ -347,7 +360,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                                         logger -t "linuxcaib-conf-printers($USER)" "Impressora JA configurada, simplement ens asseguram que l'usuari hi pugui imprimir."
                                                         $SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME 
                                                 else
-                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v smb://$USERNAME:$PASSWORD@CAIB/$PRINTSERVER/$PRINTERNAME/ -E -m $PRINTER_DRIVER -o printer-is-shared=false > /dev/null)
+                                                        resultAddPrinter=$($SUDO lpadmin -u allow:$USERNAME -p $PRINTERNAME -v smb://$USERNAME:$PASSWORD@CAIB/$PRINTSERVER/$PRINTERNAME/ -E -m $PRINTER_DRIVER -o printer-is-shared=false )
                                                         #ERROR: system-config-printer NO agafa les opcions definides... (excepte habilitació de duplex)
                                                         $SUDO lpadmin -p $PRINTERNAME $DEFAULT_PRINTER_OPTIONS > /dev/null
                                                 fi

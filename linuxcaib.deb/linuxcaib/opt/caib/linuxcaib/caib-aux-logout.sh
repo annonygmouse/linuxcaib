@@ -39,7 +39,7 @@ if [ "$USER" = "" ];then
         logger -t "linuxcaib-aux-logout($USER)" -s " no hi ha usuari definit, no feim res."
         exit 0; #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
 fi
-
+ZENITYUNAVAILABLE=false
 #Si no hi ha sessió de SEYCON/Mazinger significa que esteim desconnectats de la xarxa i no hem de fer res!
 logger -t "linuxcaib-aux-logout($USER)" "Inici"
 MZN_SESSION=$(cat $HOME/.caib/MZN_SESSION)
@@ -52,7 +52,7 @@ else
                 export LANG=C.UTF-8
         fi
         TIMEOUT=5
-        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "" 2>&1 )" != "" ];then
+        if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "comprovant zenity..." 2>&1 | grep -v warning)" != "" ];then
                 ZENITYUNAVAILABLE=true
         fi
         (
@@ -62,8 +62,17 @@ else
         echo "#Tancam sessió de seycon"
         unset https_proxy
         unset http_proxy
-        USUSEYCON=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        
+        [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-aux-logout($USER)" -s "seyconSessionUser=$seyconSessionUser"
+
+        if [ "$seyconSessionUser" != "" ];then
+                USUSEYCON=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USUSEYCON=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi     
 
         logger -t "linuxcaib-aux-logout($USER)" "Feim logout de l'usuari $USUSEYCON amb sessió de seycon $MZN_SESSION contra el servidor $SEYCON_SERVER"
         USER_SEYCON_LOGOUT=$(wget -O - -q --http-user=$USUSEYCON --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/logout?sessionId=$MZN_SESSION)
@@ -115,7 +124,7 @@ else
         
         echo "100"
         echo "# Fi"
-        ) | [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --auto-close --text "Tancant la sessió CAIB."
+        ) | ( [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --auto-close --text "Tancant la sessió CAIB." )
 
         USER_LIGHTDM_LOGOUT_EXECUTAT="S"
         export USER_LIGHTDM_LOGOUT_EXECUTAT

@@ -111,7 +111,7 @@ DEL_PREVIOUS_PRINTERS="NO" #Defineix si hem d'eliminar les impressores configura
 
 #DRIVER que funciona amb la majoria de les impressores: http://linuxibos.blogspot.com.es/2013/01/driver-that-works-on-allmost-all.html
 DEFAULT_PRINTER_DRIVER="foomatic-db-compressed-ppds:0/ppd/foomatic-ppd/Generic-PostScript_Printer-Postscript.ppd"
-DEFAULT_PRINTER_OPTIONS=" -o OptionDuplex=True -o PageSize-default=A4 -o PrintoutMode-default=Gray -o OutputMode-default=Grayscale -o Duplexer-default=DuplexNoTumble -o ColorModel-default=Gray -o PrinterResolution-default=600x600dpi -o sides-default=two-sided-long-edge "
+DEFAULT_PRINTER_OPTIONS=" -o OptionDuplex=True -o PageSize-default=A4 -o PrintoutMode-default=Gray -o OutputMode-default=Grayscale -o Duplexer-default=DuplexNoTumble -o ColorModel=Gray -o PrinterResolution-default=600x600dpi -o sides-default=two-sided-long-edge -o HPOption_Duplexer=true "
 
 
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Variables de configuració dels scripts de login activades"
