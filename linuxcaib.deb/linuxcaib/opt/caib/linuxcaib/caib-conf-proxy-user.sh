@@ -182,6 +182,7 @@ if  [ "$(cat $RUTAPIDCNTLM)" != "" ];then
         #Hi ha un cntlm anterior d'aquest usuari JA en marxa, el tancam.
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "WARN: Ja hi ha un procés cntlm d'aquest usuari en marxa (pid=$(cat $RUTAPIDCNTLM)). El tancam."
         kill $(cat $RUTAPIDCNTLM)  
+        rm $RUTAPIDCNTLM
 fi
 
 if  [ "$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }')" != "" ];then
@@ -195,8 +196,8 @@ if  [ "$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }')" != "" ];then
 fi
 
 #No cal nohup, el propi cntlm se posa en background
-cntlm  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM
 logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "cntlm  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM"
+cntlm  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "ERROR: NO s'ha pogut iniciar el cntlm"
         exit 1;
@@ -254,9 +255,15 @@ while getopts "hcv?u:p:" opt; do
         exit 0
         ;;
     c)
-        USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")        
-        ;;
+        if [ "$seyconSessionUser" != "" ];then
+                USERNAME=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi     
+        ;;    
     v)  DEBUG=1
         ;;
     u)  USERNAME="$OPTARG"
