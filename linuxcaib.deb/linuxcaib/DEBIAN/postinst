@@ -8,7 +8,7 @@
 set -e 
 
 #Si debug no està definida, la definim
-if [ -z $DEBUG ]; then DEBUG=1; fi
+if [ -z $DEBUG ]; then DEBUG=0; fi
 if [ "$DEBUG" -ge 3 ]; then
     # trace output
     set -x
@@ -58,6 +58,8 @@ case "$1" in
 	ln -s -f /opt/caib/linuxcaib/caib-pam-auth.sh  /usr/share/libpam-script/pam_script_auth
 	#PER ARA NO EMPRAM SES_OPEN
 	ln -s -f /opt/caib/linuxcaib/caib-pam-ses_open.sh  /usr/share/libpam-script/pam_script_ses_open
+        #Empram account per obtenir les dades de PAM_WINBIND_LOGONSCRIPT etc.
+       	ln -s -f /opt/caib/linuxcaib/caib-pam-account.sh  /usr/share/libpam-script/pam_script_acct
 	#Hem d'afegir el close encara que no faci res.
 	ln -s -f /opt/caib/linuxcaib/caib-pam-ses_close.sh  /usr/share/libpam-script/pam_script_ses_close
 	#Aegim el passwd per interceptar els canvis de password.

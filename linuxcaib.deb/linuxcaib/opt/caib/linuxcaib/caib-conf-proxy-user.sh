@@ -286,9 +286,7 @@ then
 fi
 
 
-if [ "$DEBUG" -gt "0" ];then
-        [ "$DEBUG" -gt "0" ] && echo "DEBUG=$DEBUG, usuari='$USERNAME', resta parametres no emprats: $@"
-fi
+[ "$DEBUG" -gt "0" ] && echo "DEBUG=$DEBUG, usuari='$USERNAME', resta parametres no emprats: $@"
 
 echo "# Proxificant aplicacions..."
 if [ $USER = "root"  ]; then

@@ -32,7 +32,7 @@ if [ -r /etc/caib/linuxcaib/DEBUG_PAM ];then
 fi
 
 #Si debug no està definida, la definim
-if [ -z $DEBUG ]; then DEBUG=1; fi
+if [ -z $DEBUG ]; then DEBUG=0; fi
 if [ "$DEBUG" -ge 3 ]; then
     # trace output
     set -x

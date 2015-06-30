@@ -4,6 +4,11 @@ Priority: 254
 Auth-Type: Primary
 Auth:
 	[success=done new_authtok_reqd=ok ignore=ignore default=ignore]  pam_script.so
+Account-Type: Additional
+Account:
+	optional	pam_script.so
+Account-Initial:
+	optional	pam_script.so
 Password-Type: Additional
 Password:
 	optional  pam_script.so

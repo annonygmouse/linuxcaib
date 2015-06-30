@@ -1,6 +1,11 @@
 #!/bin/sh
-set -x
 
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 #Script que intenta emular la política de AD: Interactive logon: Prompt user to change password before expiration 2 days
 # Mirar si falten només 5 dies o manco per expirar la contrasenya.
 # Si falten entre 3 i 5 dies, mostrar pantalla per a que l'usuari trii si la vol canviar ara o no.
@@ -34,7 +39,7 @@ canviar_password () {
 
 [ "$DEBUG" -ge "0" ] && logger -t "prompt-chgpasswd-before-expiration($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
-PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ") 
+PASSWORD=$(grep -i "^password=" /var/run/shm/"$USER"/"$USER"_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ") 
 #echo "Password llegit del fitxer de credencials: $PASSWORD"
 passExpirat=$(echo $PASSWORD |  caib-test-expiracio-contrasenya | grep expire)
 logger -t "prompt-chgpasswd-before-expiration-account($USER)" "passExpirat $passExpirat"
