@@ -915,9 +915,9 @@ fi
 
 #Variable que conté el codi d'usuari de la sessió de seycon (agafat del fitxer "credentials" creat pel PAM.
 seyconSessionUser=$(grep -i "^username=" $(carpetaTempMemoria)"/"$USER"/"$USER""_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionUser=$seyconSessionUser"
 #Variable que conté la contrasenya de la sessió de seycon (agafat del fitxer "credentials" creat pel PAM.
 seyconSessionPassword=$(grep -i "^password=" $(carpetaTempMemoria)/$USER/$USER""_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionPassword=$seyconSessionPassword"
+[ "$DEBUG" -gt "2" ] && logger -t "linuxcaib-conf-utils" -s "seyconSessionPassword=$seyconSessionPassword"
 
 

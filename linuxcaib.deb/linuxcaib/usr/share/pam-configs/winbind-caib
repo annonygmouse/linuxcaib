@@ -4,18 +4,23 @@ Priority: 255
 Conflicts: winbind
 Auth-Type: Primary
 Auth:
+        required        pam_env.so read_env=1 envfile=/etc/default/locale
 	[success=ok ignore=ignore default=die]	pam_winbind.so krb5_auth krb5_ccache_type=FILE cached_login try_first_pass
 Auth-Initial:
+        required        pam_env.so read_env=1 envfile=/etc/default/locale
 	[success=ok ignore=ignore default=die]	pam_winbind.so krb5_auth krb5_ccache_type=FILE cached_login
 Account-Type: Additional
 Account:
 	optional			pam_winbind.so
 Password-Type: Primary
 Password:
+        required        pam_env.so read_env=1 envfile=/etc/default/locale
 	[success=end default=ignore]	pam_winbind.so try_first_pass use_authtok
 Password-Initial:
+        required        pam_env.so read_env=1 envfile=/etc/default/locale
 	[success=end default=ignore]	pam_winbind.so
 Session-Type: Additional
 Session:
+        required        pam_env.so read_env=1 envfile=/etc/default/locale
 	required   pam_mkhomedir.so umask=0022 skel=/etc
 	optional			pam_winbind.so
