@@ -57,6 +57,7 @@ if [ "$CAIBCONFUTILS" != "SI" ]; then
 fi
 
 
+MOUNTOUTPUT=""
 #Funcions
 
 #Funció que monta una unitat compartida (windows share) al punt de montatge passat
@@ -109,7 +110,7 @@ else
                 logger -t "linuxcaib-conf-drives($USER)" -s "Si l'error és: \"Permission denied\" és que la contrasenya no és vàlida o l'usuari està bloquejat, telefonau al 77070 per a que vos desbloquegin l'usuari"
                 logger -t "linuxcaib-conf-drives($USER)" -s "Si l'error és: \"Device or resource busy\" és que a aquest punt ja hi ha algun dispositiu montat"
         else
-                logger -t "linuxcaib-conf-drives($USER)" -s "No he pogut montar unitat compartida $unitatCompartida a $puntMontatge"
+                logger -t "linuxcaib-conf-drives($USER)" -s "No he pogut montar unitat compartida $unitatCompartida a $puntMontatge, error: $MOUNTOUTPUT"
         fi        
         if [ "$DEBUG" -gt "0" ];then
                 logger -t "linuxcaib-conf-drives($USER)" -s "Parametres:"
@@ -158,7 +159,6 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
 output_file=""
-
 while getopts "hmcv?u:p:" opt; do
     case "$opt" in
     h|\?)
@@ -166,8 +166,15 @@ while getopts "hmcv?u:p:" opt; do
         exit 0
         ;;
     c)
-        USERNAME=$(grep -i "^username=" /home/$USU_LINUX/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" /home/$USU_LINUX/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")        
+        if [ "$seyconSessionUser" != "" ];then
+                USERNAME=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+                logger -t "linuxcaib-conf-drives($USER)" -s "INFO: emprant seyconSessionUser i seyconSessionPassword ($USERNAME - $PASSWORD)"
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi     
         ;;
     v)  DEBUG=1
         ;;
@@ -183,6 +190,7 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

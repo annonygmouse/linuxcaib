@@ -284,7 +284,7 @@ case "$PAM_SERVICE" in
         obte_info_usuari
         crear_usuari_local
         crear_fitxers_credencials $PAM_USER $PAM_AUTHTOK
-        enllacar_fitxers_credencials $PAM_USER $TMPMEM /home/$PAM_USER
+        #enllacar_fitxers_credencials $PAM_USER $TMPMEM /home/$PAM_USER
         seycon_login 
         #Cream sessió al seycon.... ALERTA si ho movem a pam_open_session en executar-se caib-lightdm-login no hi haura donada l'alta la sessió de Mazinger!!!!   
         sh $BASEDIR/caib-conf-seyconsession.sh -u $PAM_USER -c -v
@@ -326,7 +326,7 @@ case "$PAM_SERVICE" in
                                 obte_info_usuari
                                 crear_usuari_local
                                 crear_fitxers_credencials $PAM_USER $PAM_AUTHTOK
-                                enllacar_fitxers_credencials $PAM_USER $TMPMEM /home/$PAM_USER
+                                #enllacar_fitxers_credencials $PAM_USER $TMPMEM /home/$PAM_USER
                                 seycon_login 
                                 #Cream sessió al seycon.... ALERTA si ho movem a pam_open_session en executar-se caib-lightdm-login no hi haura donada l'alta la sessió de Mazinger!!!!   
                                 sh $BASEDIR/caib-conf-seyconsession.sh -u $PAM_USER -c -v
