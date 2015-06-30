@@ -1,6 +1,6 @@
 #! /bin/sh
 
- Script de libpam-script per fer login mitjançant certificat digital
+# Script de libpam-script per fer login mitjançant certificat digital
 
 if [ -z $LANG ]; then 
         export LANG=C.UTF-8

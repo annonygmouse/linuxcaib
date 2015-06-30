@@ -79,8 +79,8 @@ while getopts "hcv?u:p:" opt; do
         else
                 echo "HOME=$HOME"
         fi
-        USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")        
+        #USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        PASSWORD=$(grep -i "^password=" /var/run/shm/$USERNAME"/"$USERNAME"_caib_credentials" | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")  
         ;;
     v)  DEBUG=1
         ;;
@@ -93,7 +93,11 @@ done
 
 shift $((OPTIND-1))
 
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword=$seyconSessionPassword"
+
 [ "$1" = "--" ] && shift
+
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
@@ -145,7 +149,7 @@ fi
                 if [ $( echo $USER_SESSION | cut -f 1 -d "|" ) = "OK" ];then        
                         ln -sf "$TMPMEM/""$USERNAME/""MZN_SESSION" /home/$USERNAME/.caib/MZN_SESSION
                         chown $USERNAME:"$USER_GID" /home/$USERNAME/.caib/MZN_SESSION
-                        chown -h $USERNAME:"$USER_GID"E /home/$USERNAME/.caib/MZN_SESSION
+                        chown -h $USERNAME:"$USER_GID" /home/$USERNAME/.caib/MZN_SESSION
                         echo $SESSION_ID > /home/$USERNAME/.caib/MZN_SESSION
                         logger -t "linuxcaib-conf-seyconsession($USERNAME)" "Sessió del mazinger creada al seycon ($SESSION_ID)"
                         if [ "$USER_SEYCON_LOGIN_ADMIN" = "true" ];then

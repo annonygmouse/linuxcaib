@@ -139,8 +139,14 @@ while getopts "hiocv?u:p:" opt; do
         exit 0
         ;;
     c)
-        USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
-        PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")        
+        if [ "$seyconSessionUser" != "" ];then
+                USERNAME=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi     
         ;;
     i)  origen=$perfilmontat
         desti=$HOME
@@ -160,6 +166,7 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
