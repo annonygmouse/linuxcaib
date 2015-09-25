@@ -1,10 +1,10 @@
 Package: linuxcaib
-Version: 0.9.0
+Version: 0.9.1
 Section: admin
 Priority: optional
 Architecture: all
 Pre-Depends: krb5-user (>=1.10), libpam-krb5 (>=4.5), libpam-script (>=1.1.4), zenity (>=3.4), bsd-mailx, ssh, ntp, nfs-common, sudo 
-Depends: libpam-runtime (>= 1.0.1-6), dash, sudo, xterm, xdg-user-dirs (>=0.14), xmlstarlet (>=1.3.0), lightdm-gtk-greeter (>=1.1.5), lightdm (>=1.2.3)| gdm3, gnome-session | xfce4-session, printer-driver-all, cups, hplip, xdotool, gcalctool, gpaint | kolourpaint4, dconf-tools, libnss3-tools, samba, vino, laptop-detect, pwgen, perl, libc-bin (>=2.7), libc6, tcl, tk, tcl8.5, tk8.5, adduser, laptop-detect, xserver-xorg (>=1:7.6) | xserver-xorg-lts-saucy | xserver-xorg-lts-trusty, libccid, pcscd, cifs-utils, gnome-session-fallback, numlockx, libpam-mkhomedir, libpam-winbind, libnss-winbind, caribou, florence, p7zip-full, sharutils, arj, unace, lrzip, lhasa, ncompress, lzop, unrar-free, puppet, whois,  syslinux, proxytunnel  
+Depends: libpam-runtime (>= 1.0.1-6), dash, sudo, xterm, xdg-user-dirs (>=0.14), xmlstarlet (>=1.3.0), lightdm-gtk-greeter (>=1.1.5), lightdm (>=1.2.3)| gdm3, gnome-session | xfce4-session, printer-driver-all, cups, hplip, xdotool, gcalctool, gpaint | kolourpaint4, dconf-tools, libnss3-tools, samba, vino, laptop-detect, pwgen, perl, libc-bin (>=2.7), libc6, tcl, tk, tcl8.5, tk8.5, adduser, laptop-detect, xserver-xorg (>=1:7.6) | xserver-xorg-lts-saucy | xserver-xorg-lts-trusty, libccid, pcscd, cifs-utils, gnome-session-fallback | gnome-session-flashback, numlockx, libpam-mkhomedir, libpam-winbind, libnss-winbind, caribou, florence, p7zip-full, sharutils, arj, unace, lrzip, lhasa, ncompress, lzop, unrar-free, puppet, whois,  syslinux, proxytunnel  
 Recommends: gnome-session (>=3.2.1), gnome-session-fallback (>=3.2.1), cntlm (=0.92.3-caib) | cntlm (=0.92.3) | cntlm (>=0.92.3), syslinux-utils
 Maintainer: Sebastià Matas Riera <smatas@dgtic.caib.es>
 Homepage: http://gforge.caib.es/projects/linuxcaib/

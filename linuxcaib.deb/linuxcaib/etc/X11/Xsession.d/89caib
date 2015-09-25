@@ -20,8 +20,8 @@ if [ "$USER" != "" ];then
 
 	BASEDIR=$(dirname $0)
 	BASEDIRRDLINK=$( readlink "$BASEDIR""$0")
-	[ "$DEBUG" -gt "0" ] && echo "BASEDIR=$BASEDIR  BASEDIRRDLINK=$BASEDIRRDLINK"
-	[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-xsession-89caib($USER)" "BASEDIR=$BASEDIR  BASEDIRRDLINK=$BASEDIRRDLINK"
+	[ "$DEBUG" -gt "1" ] && echo "BASEDIR=$BASEDIR  BASEDIRRDLINK=$BASEDIRRDLINK"
+	[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-xsession-89caib($USER)" "BASEDIR=$BASEDIR  BASEDIRRDLINK=$BASEDIRRDLINK"
 
 	#Si tenim sessió de seycon/mazinger significa que esteim dins la xarxa de la CAIB
 	MZN_SESSION=$(cat $HOME/.caib/MZN_SESSION 2> /dev/null)

@@ -73,8 +73,8 @@ fi
 
 
 #Per ara deshabilit debug d'aquest script
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" "Inici script open account caib home=$HOME"
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" -s "PAM_WINBIND_LOGONSCRIPT=$PAM_WINBIND_LOGONSCRIPT PAM_WINBIND_LOGONSERVER=$PAM_WINBIND_LOGONSERVER"
+[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" "Inici script open account caib home=$HOME"
+[ "$DEBUG" -ge "1" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" -s "PAM_WINBIND_LOGONSCRIPT=$PAM_WINBIND_LOGONSCRIPT PAM_WINBIND_LOGONSERVER=$PAM_WINBIND_LOGONSERVER"
 case "$PAM_SERVICE" in
     "lightdm" | "login")
         logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" -s  "Account"
@@ -93,6 +93,6 @@ case "$PAM_SERVICE" in
         ;;
 esac
 
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" "Fi script account caib per l'usuari (success)"
+[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-pam-account($PAM_SERVICE-$PAM_USER)" "Fi script account caib per l'usuari (success)"
 # success
 exit 0

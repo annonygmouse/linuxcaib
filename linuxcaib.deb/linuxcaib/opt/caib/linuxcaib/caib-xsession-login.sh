@@ -55,6 +55,7 @@ SSODAEMONPORT=$( cat "$TMPMEM/""$USER/""$USER""_ssodaemonport")
 if [ -r $HOME/.profile_caib_proxy ];then
         . $HOME/.profile_caib_proxy
 fi
+rm /tmp/"$USER"_forceLogout
 (
 echo "# Accés a la xarxa corporativa";
 sleep $LONGSLEEP;
@@ -89,7 +90,8 @@ echo "10" ; echo "# Detectant entorn" ;sleep $SLEEP
 dash /opt/caib/linuxcaib/caib-conf-entorn-xsession.sh; 
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-xsession-login($USER)" "Detectant entorn ha tornat error!"
-        forceLogout=true
+        echo "1" > /tmp/"$USER"_forceLogout
+        exit 1;
 fi
 
 echo "15" ; echo "# Configurant Office" ;sleep $SLEEP
@@ -168,10 +170,14 @@ echo "#Fi"
 echo "100" ; sleep $SLEEP
 ) | /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa" --percentage=0  --auto-close --text "Accés a la xarxa corporativa"
 
-if [ "$forceLogout" = true ];then
+if [ -r /tmp/"$USER"_forceLogout ];then
         /usr/bin/zenity  --error --title="Accés a la xarxa corporativa" --text="S'ha produit un error que impedeix iniciar sessió.\n\n Telefonau al vostre CAU."
+        logger -t "linuxcaib-xsession-login($USER)"  "ForceLogout"
         exit 1;
+else
+        logger -t "linuxcaib-xsession-login($USER)"  "ForceLogout=$forceLogout"
 fi
+
 #Forçam la càrrega del .profile_caib_proxy per definir les variables d'entorn PROXY fora del bucle de zenity per a que inicialment la sessió X tengui les variables d'entorn del proxy.
 #Posteriorment el bash llegirà .profile
 #Carregam les variables d'entorn a l'escript actual.
