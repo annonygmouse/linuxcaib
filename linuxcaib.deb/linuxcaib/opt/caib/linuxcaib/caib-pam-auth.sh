@@ -286,9 +286,12 @@ case "$PAM_SERVICE" in
         crear_fitxers_credencials $PAM_USER $PAM_AUTHTOK
         #enllacar_fitxers_credencials $PAM_USER $TMPMEM /home/$PAM_USER
         seycon_login 
-        #Cream sessió al seycon.... ALERTA si ho movem a pam_open_session en executar-se caib-lightdm-login no hi haura donada l'alta la sessió de Mazinger!!!!   
-        sh $BASEDIR/caib-conf-seyconsession.sh -u $PAM_USER -c -v
-        [ "$?" != 0 ] && exit 1; #Si seyconsession torna != 0 és un error i no hem de continuar amb el login
+        
+        if [ "$PAM_SERVICE" = "lightdm" ];then
+                #Només cream sessió al seycon si entram a les X.... ALERTA si ho movem a pam_open_session en executar-se caib-lightdm-login no hi haura donada l'alta la sessió de Mazinger!!!!   
+                sh $BASEDIR/caib-conf-seyconsession.sh -u $PAM_USER -c -v
+                [ "$?" != 0 ] && exit 1; #Si seyconsession torna != 0 és un error i no hem de continuar amb el login
+        fi
 
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "DEBUG: xauth -f /var/lib/lightdm/.Xauthority -i list  --> $(xauth -f /var/lib/lightdm/.Xauthority -i list 2>&1 | tee) "
 
