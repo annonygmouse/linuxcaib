@@ -52,6 +52,7 @@ logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "CNTLM: Substituim password 
 #calculam el nom del fitxer cntlm.conf dins l'espai segur de l'usuari que tendra contrasenya en clar.
 TMPMEM=$(carpetaTempMemoria)
 NOMFITXCNTLMCONF="$TMPMEM/""$USERNAME/""$USERNAME""_cntlm.conf"
+NOMFITXCNTLMLOG="$TMPMEM/""$USERNAME/""$USERNAME""_cntlm.log"
 if [ ! -d $TMPMEM/$USERNAME/ ];then
         mkdir -p $TMPMEM/$USERNAME/
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "Creada carpeta temporal en memòria: $TMPMEM/$USERNAME/ "
@@ -196,8 +197,12 @@ if  [ "$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }')" != "" ];then
 fi
 
 #No cal nohup, el propi cntlm se posa en background
-logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "cntlm  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM"
-cntlm  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM
+if [ "$DEBUG" -gt "0" ];then
+        logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s " Activat debug de cntlm"
+        DEBUGCNTLM=" -v -T $NOMFITXCNTLMLOG "
+fi
+logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "cntlm $DEBUGCNTLM  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM"
+cntlm  $DEBUGCNTLM  -U $USERNAME -c $NOMFITXCNTLMCONF -P $RUTAPIDCNTLM
 if [ "$?" != "0" ];then
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "ERROR: NO s'ha pogut iniciar el cntlm"
         exit 1;
