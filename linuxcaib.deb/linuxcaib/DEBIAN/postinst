@@ -119,7 +119,7 @@ case "$1" in
 		        #Primer comentam el show-indicators anterior
 		        sed -i 's/^show-indicators=/#prelinuxcaibshow-indicators=/g' /etc/lightdm/lightdm-gtk-greeter.conf
 			#Ara afegim la personalització de la caib
-		        echo "show-indicators=~host;~a11y;~language;~session;~power" >> /etc/lightdm/lightdm-gtk-greeter.conf
+		        echo "show-indicators=~host;~a11y;~clock;~language;~session;~power" >> /etc/lightdm/lightdm-gtk-greeter.conf
 
 		        #Primer comentam el screensaver-timeout anterior
 		        sed -i 's/^screensaver-timeout=/#prelinuxcaibscreensaver-timeout=/g' /etc/lightdm/lightdm-gtk-greeter.conf
@@ -293,7 +293,7 @@ case "$1" in
 
 	#Feim els diverts dels fitxers de configuració
 	#https://wiki.debian.org/ConfigPackages
-	for f in krb5.conf puppet/puppet.conf apparmor.d/usr.sbin.cupsd
+	for f in krb5.conf puppet/puppet.conf pam.d/polkit-1 apparmor.d/usr.sbin.cupsd
 	do
 		dpkg-divert --add --package ${PKG} --rename \
 		        --divert /etc/$f.original /etc/$f
