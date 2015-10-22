@@ -67,7 +67,12 @@ usuariSeycon=$1
 password=$2
 unitatCompartida=$3
 puntMontatge=$4
+group_id=$5
 
+if [ "$group_id" = "" ];then
+        logger -t "linuxcaib-conf-drives($USER)" -s "montaUnitatCompartida group_id no proporconat, emprant -domain users- com a fallback"
+        group_id=$(id $usuariSeycon | sed -r 's/.*,(.*)\(domain users.*/\1/');
+fi
 
 if [ "$LUSERCONF_PAM_MOUNT" = "SI" ];then
         logger -t "linuxcaib-conf-drives($USER)" -s "No mont la unitat perque estic creant el fitxer de configuració .pam_mount.conf.xml"
@@ -86,7 +91,7 @@ fi
 #Cream la carpeta de montatge si no existeix
 if [ ! -d $puntMontatge ];then
         mkdir -p $puntMontatge
-        chown $USER:$USER $puntMontatge
+        chown $USER:$group_id $puntMontatge
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s  "creada carpeta de montatge $puntMontatge"
 fi
 
@@ -96,12 +101,21 @@ fi
 #else
 #Opcions que empra el mazinger a linux: sprintf(opts,"unc=%s,uid=%d,gid=%d,file_mode=0700,dir_mode=0700,ver=1,iocharset=utf8",
 #A jo amb els mode=0700 me dona un error.
-        { MOUNTOUTPUT=$( mount -t cifs $unitatCompartida $puntMontatge  -o iocharset=utf8,rw,username=$usuariSeycon,password=$password,file_mode=0777,dir_mode=0777,nobrl 2>&1 1>&3-) ;} 3>&1
+
+# TODO: afegir el gid i uid per cada unitat!  
+# Exemple per l'usuari u83511:
+#       id:
+#uid=94891(u83511) gid=10513(domain users) grups=10513(domain users),27(sudo),108(lpadmin),131(vboxusers),2001(BUILTIN\users),11065(dgtic),14232(punitot2),106751(dgticseg),109321(client_notes),129580(dgticfax),143710(dgticadmdigital),152103(int_usuari2)
+#       
+#        mount -t cifs //lofigrp1/dgticadmdigital /media/test_i/  -o iocharset=utf8,rw,username=u83511,password=XXXXXXXXX,gid=143710,uid=94891,file_mode=0777,dir_mode=0777,nobrl
+
+#Seria una cosa aixi: mount -t cifs //lofigrp1/dgticadmdigital /media/test_i/  -o iocharset=utf8,rw,username=u83511,password=XXXXXXXXX,gid=$PARAM_GID,uid=$(id -u),file_mode=0770,dir_mode=0770,nobrl
+        { MOUNTOUTPUT=$( mount -t cifs $unitatCompartida $puntMontatge  -o iocharset=utf8,rw,username=$usuariSeycon,password=$password,uid=$(id -u $USER),gid=$group_id,nobrl 2>&1 1>&3-) ;} 3>&1
 #fi
 RESULTM=$?
 
 if [ $RESULTM -eq 0 ];then
-   logger -t "linuxcaib-conf-drives($USER)" -s  "Montada Unitat $unitatCompartida a $puntMontatge"
+   logger -t "linuxcaib-conf-drives($USER)" -s  "Montada Unitat $unitatCompartida a $puntMontatge, amb uid=$(id -u $USER) i gid=$group_id"
    return 0
 else
 
@@ -169,7 +183,7 @@ while getopts "hmcv?u:p:" opt; do
         if [ "$seyconSessionUser" != "" ];then
                 USERNAME=$seyconSessionUser
                 PASSWORD=$seyconSessionPassword
-                logger -t "linuxcaib-conf-drives($USER)" -s "INFO: emprant seyconSessionUser i seyconSessionPassword ($USERNAME - $PASSWORD)"
+                [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-drives($USER)" -s "INFO: emprant seyconSessionUser i seyconSessionPassword ($USERNAME - amb password de $(echo -n $PASSWORD | wc -c ) caràcters )"
         else
                 #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
                 USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
@@ -244,7 +258,7 @@ if [ $RESULTM -eq 0 ];then
 # Cream mount.conf local:
 #<volume options="uid=%(USER),gid=10000,dmask=0700" user="*" mountpoint="/home/%(USER)" path="%(USER)" server="servername" fstype="smbfs" /> 
                 PAM_MOUNT_H_VOLUME="<volume options=\"uid=%(USER),gid=10000,dmask=0700\" user=\"%(USER)\" mountpoint=\"/home/%(USER)/unitat_H\" path=\"%(USER)/\" server=\"$HOME_DRIVE_SERVER\" fstype=\"cifs\" />"
-                RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$HOME_DRIVE_SERVER.caib.es/$USERNAME /home/$USU_LINUX/unitat_H)
+                RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$HOME_DRIVE_SERVER.caib.es/$USERNAME /home/$USU_LINUX/unitat_H $(id $USERNAME -u) )
                 RESULT=$?
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "resultat montar: $RESULTM"
                 if [ ! $RESULT -eq 0 ];then
@@ -261,16 +275,16 @@ if [ $RESULTM -eq 0 ];then
 
 
         #MONTAR UNITAT PERFIL
-        logger -t "linuxcaib-conf-drives($USER)" "Montam la unitat amb el perfil mobil"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" "Montam la unitat amb el perfil mobil"
         # El perfil esta a: caib.es/profiles/$USERNAME   o caib.es/profiles/$USERNAME.V2 (a partir de windows 7)
         # PREGUNTA: L'AD crea el directori?
         #Montar dins /media/$USER/.unitat_perfil per a que no aparegui dins el nautilus.
         xpath="data/row[1]/MAQPRO_NOM"
         PROFILE_DRIVE_SERVER=$(echo $USER_DATA | xmlstarlet sel -T -t -c $xpath )
         if  ( isHostNear "$PROFILE_DRIVE_SERVER" ) ; then
-                mkdir -p /home/$USU_LINUX/.unitat_perfil
-                chown $USER:$USER /home/$USU_LINUX/.unitat_perfil
-        RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$PROFILE_DRIVE_SERVER.caib.es/profiles/$USERNAME /media/$USU_LINUX/.unitat_perfil)
+                #mkdir -p /media/$USU_LINUX/.unitat_perfil
+                #chown $USER:$USER /media/$USU_LINUX/.unitat_perfil
+        RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$PROFILE_DRIVE_SERVER.caib.es/profiles/$USERNAME /media/$USU_LINUX/.unitat_perfil $(id $USERNAME -u))
                 RESULT=$?
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "resultat montar perfil: $RESULTM"
                 if [ ! $RESULT -eq 0 ];then
@@ -299,7 +313,7 @@ fi
 
 #Montam la unitat P
 echo "# Montant unitat ofimatica (P)"
-logger -t "linuxcaib-conf-drives($USER)" -s "Montant unitat P"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Montant unitat P"
 if  ( isHostNear "$PSERVER" ) ; then        
         RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$PSERVER.caib.es/$PSHARE /media/P_$PSHARE)
         #sudo mount -t cifs //lofiapp1/pcapp /home/$USU_LINUX/unitatscompartides/unitat_p -o iocharset=utf8,rw,username=$USU,password=$PASS,file_mode=0777,dir_mode=0777,nobrl
@@ -323,7 +337,7 @@ fi
 
 #Si montar la primera unitat va bé, feim la resta, en cas contrari no n'intentam montar cap més.
 #Configuram unitats compartides de xarxa
-logger -t "linuxcaib-conf-drives($USER)" -s "Montant altres unitats"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" "Montant altres unitats"
 
 USER_DRIVES=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$USERNAME/drives )
 RESULTM=$?
@@ -337,7 +351,10 @@ fi
 #<row><GRU_UNIOFI>G:</GRU_UNIOFI><MAQ_NOM>lofigrp1</MAQ_NOM><GRU_CODI>dgtic</GRU_CODI></row>
 
 
-
+mkdir -p /media/$USERNAME/
+chown $USERNAME:$USERNAME /media/$USERNAME/
+mkdir -p /media/$USERNAME/unitatscompartides/
+chown $USERNAME:$USERNAME /media/$USERNAME/unitatscompartides/
 
 NUM_DRIVES_USER=0;
 xpath=""
@@ -374,14 +391,19 @@ for y in $(seq 1 1 $NUM_DRIVES_USER) ; do
         else
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "La lletra a montar es: $UNIT_LETTER";
         fi
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Unitat: $UNIT_LETTER servidor: $UNITSERVER codi de grup $GROUPCODE  -> montar: //$UNITSERVER/$GROUPCODE a la unitat /home/$USER/unitatscompartides/$UNIT_LETTER_$GROUPCODE"
-         #El mazinger fa aquesta comprovació abans de montar: if (isHostNear (host)) {
-        #Supòs que mira si aquest servidor és accessible... ping?
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Unitat: $UNIT_LETTER servidor: $UNITSERVER codi de grup $GROUPCODE  -> montar: //$UNITSERVER/$GROUPCODE a la unitat /media/$USER/unitatscompartides/$UNIT_LETTER_$GROUPCODE"
+
+        #TODO: agafar l'id del GROUPCODE de l'usuari.
+        #       Agafar el ,143710(dgticadmdigital) identificador del grup amb nom groupcode mitjançant expressió regular.        
+        # id|sed -r 's/.*,(.*)\(plugdev.*/\1/'
+        #El mazinger fa aquesta comprovació abans de montar: if (isHostNear (host)) {
+        GROUP_ID=$(id $USERNAME | sed -r 's/.*,(.*)\('"$GROUPCODE"'.*/\1/');
+        logger -t "linuxcaib-conf-drives($USER)" -s "group_id=$GROUP_ID "
         if  ( isHostNear "$UNITSERVER" ) ; then        
                 echo "# Montant unitat ("$UNIT_LETTER"_"$GROUPCODE")"                
-                mkdir -p /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
-                chown $USER:$USER /home/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
-                RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$UNITSERVER/$GROUPCODE /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE")
+                #mkdir -p /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
+                #chown $USER:$ID_GROUP /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
+                RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$UNITSERVER/$GROUPCODE /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE" $GROUP_ID)
                 PAM_MOUNT_OTHER_VOLUME="$PAM_MOUNT_OTHER_VOLUME 
 <volume options=\"uid=%(USER),gid=10000,dmask=0700\" user=\"*\" mountpoint=\"/home/%(USER)/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"\" path=\"$GROUPCODE/\" server=\"$UNITSERVER\" fstype=\"cifs\" />"
         else
