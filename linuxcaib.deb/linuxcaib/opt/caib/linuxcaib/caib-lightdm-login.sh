@@ -136,7 +136,7 @@ logger -t "linuxcaib-lightdm-login($USER)"  "Iniciant proxy-server"
 dash /opt/caib/linuxcaib/caib-conf-proxy-server.sh -c;
 
 if [ ! -f /etc/caib/linuxcaib/disableconfprinters ];then
-        logger -t "linuxcaib-lightdm-login($USER)"  "Iniciant impressores"
+        logger -t "linuxcaib-lightdm-login($USER)" "Iniciant impressores"
         echo "65" ; echo "# Donant d'alta impressores" ; sleep $SLEEP
         nohup dash /opt/caib/linuxcaib/caib-conf-printers.sh -c &
 else
@@ -187,7 +187,7 @@ if [ -d /media/P_"$PSHARE"/caib/dissoflinux ];then
                  #TODO: hem de recollir el resultat, Per saber si ha anat bé o no!
                 ) | /usr/bin/zenity  --progress --title="Instal·lant components de sistema" --text="Instal·lant components de sistema" --pulsate --no-cancel --auto-close 
         else
-                logger -t "linuxcaib-lightdm-login($USER)" "dissof de sistema deshabilitat (/etc/caib/dissoflinux/disabledissofadmin)"
+                logger -t "linuxcaib-lightdm-login($USER)" "INFO: dissof de sistema deshabilitat (/etc/caib/dissoflinux/disabledissofadmin)"
         fi
 else
         /usr/bin/zenity --timeout 10  --error --title="Instal·lant components de sistema" --text="ERROR: la unitat de xarxa ofimàtica (lofiapp) NO està montada.\nNo es poden instal·lar actualitzacions del sistema (dissof)\n\nAquest dialeg se tancara en 10 segons"

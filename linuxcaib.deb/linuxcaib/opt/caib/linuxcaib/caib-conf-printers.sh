@@ -231,7 +231,7 @@ if [ $RESULTM -eq 0 ];then
 fi
 
 
-logger -t "linuxcaib-conf-printers($USER)" "Estat impressores: $(lpstat  -a)"
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-printers($USER)" "Estat impressores: $(lpstat  -a)"
 
 avahiCache=""
 if [ $NUM_PRINTERS -gt 0 ];then
@@ -239,7 +239,7 @@ if [ $NUM_PRINTERS -gt 0 ];then
         #Valorar si afegir -c a avahi-browse, per emprar la cache... seria mes ràpid.
         logger -t "linuxcaib-conf-printers($USER)" "Iniciant avahi-browse.";                
         avahi-browse -a $avahiCache -t -v -r -p 2>/dev/null > /tmp/avahi
-        logger -t "linuxcaib-conf-printers($USER)" "Fi avahi-browse.";
+        [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-printers($USER)" "Fi avahi-browse.";
 
 fi
 

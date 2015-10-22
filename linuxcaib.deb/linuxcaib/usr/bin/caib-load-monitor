@@ -51,7 +51,7 @@ EOF
 #Fi funcions
 
 if [ $USER = "root"  ]; then
-        logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: no se pot executar com a root!"
+        logger -t "linuxcaib-load-monitor($USER)" -s "ERROR: no se pot executar com a root!"
         exit 1;
 fi
 

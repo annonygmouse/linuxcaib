@@ -22,7 +22,6 @@ fi
 
 #echo "BASEDIRPAM=$BASEDIRPAM  BASEDIR: $BASEDIR , RUTA_FITXER=$RUTA_FITXER"
 if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
-        #logger -t "linuxcaib-conf-drives($USER)" -s "CAIB_CONF_SETTINGS=$CAIB_CONF_SETTINGS Carregam utils de $BASEDIR/caib-conf-utils.sh"
         . $BASEDIR/caib-conf-utils.sh
 fi
 
@@ -84,6 +83,7 @@ arrancar_seycon_session_daemon () {
 
 #Per ara deshabilit debug d'aquest script
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-ses_open($PAM_SERVICE-$PAM_USER)" "Inici script open session caib home=$HOME"
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" "PAM_WINBIND_HOMEDIR=$PAM_WINBIND_HOMEDIR PAM_WINBIND_LOGONSCRIPT=$PAM_WINBIND_LOGONSCRIPT PAM_WINBIND_LOGONSERVER=$PAM_WINBIND_LOGONSERVER PAM_WINBIND_PROFILEPATH=$PAM_WINBIND_PROFILEPATH"
 
 case "$PAM_SERVICE" in
     "lightdm" | "login")

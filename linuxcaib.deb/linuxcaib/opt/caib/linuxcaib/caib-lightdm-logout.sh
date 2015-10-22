@@ -81,7 +81,7 @@ if [ "$MZN_SESSION"  = "" ];then
         #zenity --notification --timeout=2 --title="Accés a la xarxa intranet (lightdm)"  --text="Sortint de sessió d'usuari local $USER (lightdm)"
         echo "$stamp caib-lightdm-logout($USER) usuari sense sessió de seycon!" >> /home/$USER/shutdown-lightdm.txt
 else
-        logger -t "linuxcaib-lightdm-logout($USER)" "uid=$(id -u) Logout de lightdm de usuari $USER amb sessió de seycon"
+        logger -t "caib-lightdm-logout($USER)" "uid=$(id -u) Logout de lightdm de usuari $USER amb sessió de seycon"
         TIMEOUT=5
         if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "comprovant zenity..." 2>&1 | grep -v warning)" != "" ];then
                 logger -t "linuxcaib-lightdm-logout($USER)" "zenity no està disponible!"
@@ -90,14 +90,14 @@ else
         (
         SEC=$TIMEOUT;
         echo "#Tancant la sessió CAIB...";
-        echo 10
+        echo "10"
         if [ ! -f /etc/caib/linuxcaib/disableperfilmobil ] && [ ! -f ~/.caib/linuxcaib/disableperfilmobil ];then 
-                logger -t "linuxcaib-aux-logout($USER)" "iniciant sincronització perfil mobil"
+                logger -t "caib-lightdm-logout($USER)" "iniciant sincronització perfil mobil"
                 sh /opt/caib/linuxcaib/caib-perfil-mobil.sh -c -o
         else
-                logger -t "linuxcaib-aux-logout($USER)" "ALERTA: perfil mobil deshabilitat!"
+                logger -t "caib-lightdm-logout($USER)" "ALERTA: perfil mobil deshabilitat!"
         fi
-        echo 20
+        echo "20"
         barra=10
         for unitat in $(/bin/df -P  | grep $USER | grep -v $PSERVER_LINUX | grep -v $PSERVER | awk 'BEGIN  { FS=" "} {print $6}');do
                 echo "# Desmontant unitat ($unitat)"
@@ -105,7 +105,10 @@ else
                 sync
                 #Comprovam que el umount ha anat bé i podem esborrar el directori
                 if [ "$(/bin/df -P  | grep $unitat )" != "" ];then
+                        logger -t "caib-lightdm-logout($USER)" "ERROR: desmontant unitat ($unitat)!"
                         echo "# ERROR: desmontant unitat ($unitat)";sleep 5;
+                else
+                        logger -t "caib-lightdm-logout($USER)" "Desmontada unitat ($unitat) correctament!"
                 fi
                 barra=$((barra=barra+1)) 
                 sleep 0.5
@@ -113,7 +116,7 @@ else
         echo "$stamp caib-lightdm-logout($USER) Unitats de xarxa de l'usuari desmontades" >> /home/$USER/shutdown-lightdm.txt
         logger -t "linuxcaib-lightdm-logout($USER)" "Unitats de xarxa de l'usuari desmontades"
 
-        echo 30
+        echo "30"
         echo "Dins del zenity " >> /home/$USER/shutdown-lightdm.txt
         echo "# Fi"
         ) | ( [ "$ZENITYUNAVAILABLE" = false ] && /usr/bin/zenity --no-cancel --progress --title="Accés a la xarxa corporativa(lightdm)" --auto-close --text "Tancant la sessió CAIB." )

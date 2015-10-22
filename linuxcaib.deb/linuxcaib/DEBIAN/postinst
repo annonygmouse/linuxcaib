@@ -116,6 +116,12 @@ case "$1" in
 			#Ara afegim el background de la caib
 		        echo "background=/usr/share/images/caib/backgroundDefault.jpg" >> /etc/lightdm/lightdm-gtk-greeter.conf
 
+                        #Primer comentam el indicators anterior
+		        sed -i 's/^indicators=/#prelinuxcaib-indicators=/g' /etc/lightdm/lightdm-gtk-greeter.conf
+			#Ara afegim la personalització de la caib
+		        echo "indicators=~host;~a11y;~clock;~language;~session;~power" >> /etc/lightdm/lightdm-gtk-greeter.conf
+
+
 		        #Primer comentam el show-indicators anterior
 		        sed -i 's/^show-indicators=/#prelinuxcaibshow-indicators=/g' /etc/lightdm/lightdm-gtk-greeter.conf
 			#Ara afegim la personalització de la caib
@@ -125,6 +131,11 @@ case "$1" in
 		        sed -i 's/^screensaver-timeout=/#prelinuxcaibscreensaver-timeout=/g' /etc/lightdm/lightdm-gtk-greeter.conf
 			#Ara afegim la personalització de la caib
 		        echo "screensaver-timeout=300" >> /etc/lightdm/lightdm-gtk-greeter.conf
+
+                        #Primer comentam el show-clock anterior
+		        sed -i 's/^show-clock=/#prelinuxcaibshow-clock=/g' /etc/lightdm/lightdm-gtk-greeter.conf
+                        #Feim que se vegi el rellotge per assegurar-mos que l'hora és correcte
+                        echo "show-clock=true" >> /etc/lightdm/lightdm-gtk-greeter.conf
 		fi
 	fi
 

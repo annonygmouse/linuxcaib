@@ -20,4 +20,4 @@ else
         logger -t "linuxcaib-ad-policies($USER): disable-media-mount" -s "deshabilitat autorun"
         gsettings set org.gnome.desktop.media-handling autorun-never true
 fi
-logger -t "linuxcaib-ad-policies($USER): disable-control-panel" -s "Fi" 
+logger -t "linuxcaib-ad-policies($USER): disable-media-mount" -s "Fi" 

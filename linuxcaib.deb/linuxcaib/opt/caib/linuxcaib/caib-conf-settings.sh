@@ -24,6 +24,12 @@ else
         BASEDIR_SETTINGS=$( dirname $RUTA_FITXER)
 fi
 
+if [ ! -d $BASEDIR/conf ];then
+        [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Carpeta de configuració no trobada. $BASEDIR, posam BASEDIR=\"/opt/caib/linuxcaib\" ."
+        BASEDIR="/opt/caib/linuxcaib";
+fi
+
+
 #BASEDIR_SETTINGS=$(dirname $(readlink $0))
 #echo "BASE SETTINGS $BASEDIR_SETTINGS"
 #echo "BASEDIR $BASEDIR"
@@ -31,7 +37,7 @@ fi
 if [ -f $BASEDIR/conf/DebugLevel ];then
         DEBUG=$(cat $BASEDIR/conf/DebugLevel )
 fi
-[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Nivell de DEBUG: $DEBUG"
+[ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Nivell de DEBUG: $DEBUG, BASEDIR=$BASEDIR"
 
 
 #SEYCON_CERT_FILE ha de ser una ruta completa
@@ -41,6 +47,7 @@ else
         SEYCON_CERT_FILE=$BASEDIR/seycon.cer
 fi
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Certificat del servidor SEYCON emprat: $SEYCON_CERT_FILE"
+
 
 
 #Servidor del SEYCON

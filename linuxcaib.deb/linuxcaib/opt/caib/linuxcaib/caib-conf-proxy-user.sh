@@ -47,7 +47,7 @@ fi
 # Actualitza el fitxer de configuració de cntlm
 actualitzaConfigCNTLM() {
 
-logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "CNTLM: Substituim password antic pel nou"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "CNTLM: Generant fitxer de configuració per l'usuari"
 
 #calculam el nom del fitxer cntlm.conf dins l'espai segur de l'usuari que tendra contrasenya en clar.
 TMPMEM=$(carpetaTempMemoria)

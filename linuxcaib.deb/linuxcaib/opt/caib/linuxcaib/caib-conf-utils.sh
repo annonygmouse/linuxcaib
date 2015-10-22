@@ -261,7 +261,7 @@ SERVIDOR=$1
 HOST_DATA=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/host/$SERVIDOR )
 RESULTM=$?
 if [ ! $RESULTM -eq 0 ];then
-   logger -t "linuxcaib-conf-utils($USER)" -s "Servidor $SERVIDOR NO està al SEYCON."
+   logger -t "linuxcaib-conf-utils($USER)" "isHostNear servidor $SERVIDOR NO està al SEYCON."
    return 1
 fi
 
@@ -269,14 +269,14 @@ xpath="data/row[1]/XAR_CODI"
 HOST_NETWORK_CODE=$(echo $HOST_DATA | xmlstarlet sel -T -t -c $xpath )
 
 if [ "$DEBUG" -gt "0" ];then
-        logger -t "linuxcaib-conf-utils($USER)" -s "isHostNear el servidor $SERVIDOR esta a la xarxa $HOST_NETWORK_CODE"
+        logger -t "linuxcaib-conf-utils($USER)" "isHostNear el servidor $SERVIDOR esta a la xarxa $HOST_NETWORK_CODE"
 fi
 
 HOSTNAME_DATA=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/host/$(hostname) )
 RESULTM=$?
 if [ ! $RESULTM -eq 0 ];then
-        logger -t "linuxcaib-conf-utils($USER)" -s "La màquina client $(hostname) NO està al SEYCON."
-         isNormalized $SERVIDOR
+        logger -t "linuxcaib-conf-utils($USER)" "isHostNear la màquina client $(hostname) NO està al SEYCON."
+        isNormalized $SERVIDOR
         normalitzats=$?
         return $normalitzat
 fi
@@ -284,12 +284,12 @@ fi
 xpath="data/row[1]/XAR_CODI"
 HOSTNAME_NETWORK_CODE=$(echo $HOSTNAME_DATA | xmlstarlet sel -T -t -c $xpath )
 if [ "$DEBUG" -gt "0" ];then
-        logger -t "linuxcaib-conf-utils($USER)" -s "isHostNear el client $(hostname) esta a la xarxa $HOSTNAME_NETWORK_CODE"
+        logger -t "linuxcaib-conf-utils($USER)" "isHostNear el client $(hostname) esta a la xarxa $HOSTNAME_NETWORK_CODE"
 fi
 
 if [ "$HOST_NETWORK_CODE" = "$HOSTNAME_NETWORK_CODE" ]; then
         if [ "$DEBUG" -gt "0" ];then
-                logger -t "linuxcaib-conf-utils($USER)" -s "isHostNear el servidor $SERVIDOR esta a prop ja que estan a la mateixa xarxa."
+                logger -t "linuxcaib-conf-utils($USER)" "isHostNear el servidor $SERVIDOR esta a prop ja que estan a la mateixa xarxa."
         fi
         return 0;
 else
@@ -297,11 +297,11 @@ else
         normalitzats=$?
         if [ "$normalitzats" ]; then
                 if [ "$DEBUG" -gt "0" ];then
-                        logger -t "linuxcaib-conf-utils($USER)" -s "isHostNear el servidor $SERVIDOR esta a prop ja que client i servidor estan normalitzats."
+                        logger -t "linuxcaib-conf-utils($USER)" "isHostNear el servidor $SERVIDOR esta a prop ja que client i servidor estan normalitzats."
                 fi
         else
                 if [ "$DEBUG" -gt "0" ];then
-                        logger -t "linuxcaib-conf-utils($USER)" -s "isHostNear el servidor $SERVIDOR NO esta a prop ja que o el servidor o el client NO estan normalitzats."
+                        logger -t "linuxcaib-conf-utils($USER)" "isHostNear el servidor $SERVIDOR NO esta a prop ja que o el servidor o el client NO estan normalitzats."
                 fi
         fi
 
@@ -335,16 +335,16 @@ case "echo "${FILE##*.}"" in
         ;;
     rpm)
         logger -t "linuxcaib-conf-utils($USER)" "Mirar si paquet esta a llista blanca de rpm instalable via alien?"
-        logger -t "linuxcaib-conf-utils($USER)" -s "No puc instalar paquets rpm a una distribucio basada en debian"
+        logger -t "linuxcaib-conf-utils($USER)" "No puc instalar paquets rpm a una distribucio basada en debian"
         return 1
         ;;
      *)
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "DebInstalPackage: s'instal·lara el paquet $PACKAGENAME."
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "DebInstalPackage: s'instal·lara el paquet $PACKAGENAME."
         $SUDO apt-get -qq install $PACKAGENAME 
         if [ "$?" != "0" ];then
-                logger -t "linuxcaib-conf-utils($USER)" -s "DebInstalPackage: ERROR instal·lant el paquet $PACKAGENAME, mirar els logs!"
+                logger -t "linuxcaib-conf-utils($USER)" "DebInstalPackage: ERROR instal·lant el paquet $PACKAGENAME, mirar els logs!"
         else
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "DebInstalPackage: paquet $PACKAGENAME instal·lat correctament."
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "DebInstalPackage: paquet $PACKAGENAME instal·lat correctament."
         fi 
         ;;        
 esac
@@ -506,10 +506,10 @@ paquetInstalat () {
         #Debian
         versioPaquet=$(dpkg -l| grep ^.i| grep -w "\s$nomPaquet\s"  |   awk 'BEGIN { FS = " " } ; { print $3 }')
         if [ "$versioPaquet" != "" ];then
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "paquetInstalat: el paquet $nomPaquet està instal·lat amb la versió $versioPaquet."
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "paquetInstalat: el paquet $nomPaquet està instal·lat amb la versió $versioPaquet."
                 return 0
         else        
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "paquetInstalat: el paquet $nomPaquet NO instal·lat."
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "paquetInstalat: el paquet $nomPaquet NO instal·lat."
                 return 1
         fi
 }
@@ -546,7 +546,7 @@ RESULTM=$?
 if [ $RESULTM -eq 0 ];then
    logger -t "linuxcaib-conf-printers($USER)" -s  "Eliminada impressora: $PRINTERNAME"
 else
-   logger -t "linuxcaib-conf-printers($USER)" -s "ERROR: no he pogut eliminar la impressora $PRINTERNAME"
+   logger -t "linuxcaib-conf-printers($USER)" "ERROR: no he pogut eliminar la impressora $PRINTERNAME"
 fi
 done
 
@@ -573,10 +573,10 @@ ticketKerberosActiu () {
 usuari=$1
 krbTicket=$(klist|grep "$usuari" >/dev/null && echo "SI")
 if [ "$krbTicket" = "SI" ];then
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "ticketKerberosActiu: l'usuari $USER té ticket actiu."
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "ticketKerberosActiu: l'usuari $USER té ticket actiu."
 return 0
 else        
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" -s "ticketKerberosActiu: l'usuari $USER NO té ticket actiu."
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils($USER)" "ticketKerberosActiu: l'usuari $USER NO té ticket actiu."
 return 1
 fi
 }
@@ -611,8 +611,8 @@ crear_fitxers_credencials () {
         password=$2
         carpeta=$(carpetaTempMemoria)
 
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" -s "id=$(id $codiUsuari)"
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" -s "gid=$(id $codiUsuari -gn)"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" "id=$(id $codiUsuari)"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" "gid=$(id $codiUsuari -gn)"
 USER_GID=$(id $codiUsuari -gn)
                 NOMFITXCREDS="$codiUsuari""_caib_credentials"
                 [ "$DEBUG" -gt "0" ] && logger -t "crear_fitxers_credencials" "Creant fitxers credentials dins memoria $carpeta/$codiUsuari/$NOMFITXCREDS."
@@ -648,8 +648,8 @@ seycon_usu=$1
 carpetaTmp=$2
 carpetaHome=$3
 
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" -s "id=$(id $seycon_usu)"
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" -s "gid=$(id $seycon_usu -gn)"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" "id=$(id $seycon_usu)"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils(crear_fitxers_credencials)" "gid=$(id $seycon_usu -gn)"
 USER_GID=$(id $seycon_usu -gn)
        #1. enllaçar $HOME/credentials cap a /tmpfs/$USER_caib_credentials
         TMPMEM=$carpetaTmp
@@ -908,7 +908,7 @@ fi
 #Si no existeix la variable "USER" miram d'emprar "PAM_USER"
 if [ -z $USER ];then
         if [ ! -z $PAM_USER ];then
-                [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" -s "emprant USER=PAM_USER"
+                [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" "Emprant USER=PAM_USER ($PAM_USER)"
                 USER=$PAM_USER
         fi
 fi

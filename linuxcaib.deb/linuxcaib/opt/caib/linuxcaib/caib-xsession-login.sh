@@ -75,6 +75,7 @@ if [ "$result" = "changed" ];then
         zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Contrasenya canviada satisfactòriament, reiniciant la sessió" &
         gnome-session-quit --logout --no-prompt
         #Ha canviat contrasenya, hem de tornar a fer login!
+        echo "1" > /tmp/"$USER"_forceLogout
         exit 1
 else 
         if [ "$result" = "" ];then
@@ -114,7 +115,7 @@ fi
 #Executam el dissof (esteim amb permissos de usuari!)
 #NOTA: AQUI CAL TENIR JA MONTADA LA UNITAT P !!!!!!
 if [ -d /media/P_"$PSHARE"/caib/dissoflinux ];then
-	logger -t "linuxcaib-xsession-login($USER)" "login: caib-conf-proxy-user"
+	logger -t "linuxcaib-xsession-login($USER)" "Executam el paquet dissof de proxy"
 	#/usr/bin/tclsh /media/P_*/dissoflinux/027970/install.tcl
 	caib-dissof-paquet 027970
 else

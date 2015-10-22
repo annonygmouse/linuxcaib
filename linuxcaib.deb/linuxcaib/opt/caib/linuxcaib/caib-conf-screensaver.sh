@@ -6,7 +6,7 @@
 #Ruta base scripts
 BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
-        logger -t "linuxcaib-conf-drives($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
+        logger -t "linuxcaib-conf-screensaver($USER)" -s "CAIBCONFUTILS=$CAIBCONFUTILS Carregam utilitats de $BASEDIR/caib-conf-utils.sh"
         . $BASEDIR/caib-conf-utils.sh
 fi
 

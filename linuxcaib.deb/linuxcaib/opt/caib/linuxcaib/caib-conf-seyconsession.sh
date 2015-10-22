@@ -30,7 +30,6 @@ fi
 #[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$USERNAME)" -s "BASEDIR=$BASEDIR"
 
 if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
-        #logger -t "linuxcaib-conf-drives($USER)" -s "CAIB_CONF_SETTINGS=$CAIB_CONF_SETTINGS Carregam utils de $BASEDIR/caib-conf-utils.sh"
         . $BASEDIR/caib-conf-utils.sh
 fi
 
@@ -93,16 +92,16 @@ done
 
 shift $((OPTIND-1))
 
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword=$seyconSessionPassword"
 
 [ "$1" = "--" ] && shift
 
 [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword de $(echo -n $seyconSessionPassword | wc -c ) caràcters "
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
 #Si NO tenim usuari i password no podem configurar les impressores
-    echo "ERROR: Se necessita usuari i contrassenya per poder crear la sessió al seycon USERNAME=$USERNAME PASSWORD=$PASSWORD " >&2
+    #echo "ERROR: Se necessita usuari i contrassenya per poder crear la sessió al seycon USERNAME=$USERNAME PASSWORD=$PASSWORD " >&2
     #echo "credentials=$(cat /home/$PAM_USER/credentials)"
     show_caib_conf_seyconsession_help
     exit 1
