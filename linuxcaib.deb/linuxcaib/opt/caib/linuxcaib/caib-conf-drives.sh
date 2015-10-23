@@ -110,12 +110,12 @@ fi
 #        mount -t cifs //lofigrp1/dgticadmdigital /media/test_i/  -o iocharset=utf8,rw,username=u83511,password=XXXXXXXXX,gid=143710,uid=94891,file_mode=0777,dir_mode=0777,nobrl
 
 #Seria una cosa aixi: mount -t cifs //lofigrp1/dgticadmdigital /media/test_i/  -o iocharset=utf8,rw,username=u83511,password=XXXXXXXXX,gid=$PARAM_GID,uid=$(id -u),file_mode=0770,dir_mode=0770,nobrl
-        { MOUNTOUTPUT=$( mount -t cifs $unitatCompartida $puntMontatge  -o iocharset=utf8,rw,username=$usuariSeycon,password=$password,uid=$(id -u $USER),gid=$group_id,nobrl 2>&1 1>&3-) ;} 3>&1
+        { MOUNTOUTPUT=$( mount -t cifs $unitatCompartida $puntMontatge  -o iocharset=utf8,rw,username=$usuariSeycon,password=$password,uid=$(id -u $usuariSeycon),gid=$group_id,nobrl 2>&1 1>&3-) ;} 3>&1
 #fi
 RESULTM=$?
 
 if [ $RESULTM -eq 0 ];then
-   logger -t "linuxcaib-conf-drives($USER)" -s  "Montada Unitat $unitatCompartida a $puntMontatge, amb uid=$(id -u $USER) i gid=$group_id"
+   logger -t "linuxcaib-conf-drives($USER)" -s  "Montada Unitat $unitatCompartida a $puntMontatge, amb uid=$(id -u $usuariSeycon) i gid=$group_id"
    return 0
 else
 
@@ -146,11 +146,12 @@ show_caib_conf_drives_help () {
 cat << EOF
 El programa "${0##*/}" monta les unitats compartides que l'usuari té assignades al SEYCON
 
-Ús: ${0##*/} [-chmv] [-u USUARI] [-p PASSWORD]
+Ús: ${0##*/} [-chmv] [-u USUARI] [-p PASSWORD] [-l USU_LOCAL]
     
       -c          agafa les credencials del fitxer "credentials". IMPORTANT, l'usuari ha de ser l'usuari de SEYCON.
       -h          mostra aquesta ajuda
-      -m          mode pam_mount. No monta les unitats, tan sols genera el .pam_mount.conf.xml
+      -l USUARI   nom de l'usuari local que s'emprarà (si es diferent al de seycon), necessari quan s'ha d'emprar via sudo
+      -m          mode pam_mount. No monta les unitats, tan sols genera el .pam_mount.conf.xml (deprecat)
       -u USUARI   nom de l'usuari a emprar
       -p PASSWORD contrasenya de l'usuari a emprar
       -v          mode verbose
@@ -158,22 +159,18 @@ El programa "${0##*/}" monta les unitats compartides que l'usuari té assignades
 Exemples:
         ${0##*/} -u u83511 -p password_u83511   Execució passant usuari i contrasenya
         ${0##*/} -c     Execució emprant fitxer de credencials
+        sudo ${0##*/} -l sebastia -u u8351 -p contrasenya_u83511            Executant via sudo amb l'usuari "sebastia"
 EOF
 }
 
 #Fi funcions
-
-if [ $USER = "root"  ]; then
-        logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: no se pot executar com a root!"
-        exit 1;
-fi
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
 # Initialize our own variables:
 output_file=""
-while getopts "hmcv?u:p:" opt; do
+while getopts "hmcv?l:u:p:" opt; do
     case "$opt" in
     h|\?)
         show_caib_conf_drives_help
@@ -189,6 +186,9 @@ while getopts "hmcv?u:p:" opt; do
                 USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
                 PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         fi     
+        ;;
+    l)  LOCALUSERNAME="$OPTARG"
+        USU_LINUX=$LOCALUSERNAME
         ;;
     v)  DEBUG=1
         ;;
@@ -206,12 +206,35 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 
+
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
 #Si NO tenim usuari i password no podem configurar el proxy local
     logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: Se necessita usuari i contrassenya per poder montar les unitats compartides" >&2
     show_caib_conf_drives_help
     exit 1
+fi
+
+
+if [ $USER = "root"  ]; then
+        echo "localusername=$LOCALUSERNAME"
+        if [ -z "$LOCALUSERNAME" ];then 
+                logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: no se pot executar com a root!"
+                show_caib_conf_drives_help
+                logger -t "linuxcaib-conf-drives($USER)" -s "Si estas executant via sudo, has d'emprar el paràmetre -l!"
+                exit 1;
+        fi
+        if [ ! -d /home/$LOCALUSERNAME  ];then
+                logger -t "linuxcaib-conf-drives($LOCALUSERNAME)" "ERROR: l'usuari local no te home! Avortant..."
+                exit 1;
+        else 
+                HOME=/home/$LOCALUSERNAME
+        fi
+fi
+
+if [ -z "$LOCALUSERNAME" ];then
+        logger -t "linuxcaib-conf-drives($USER)" "WARNING: LOCALUSERNAME no definit, serà \$USER ($USER) "
+        LOCALUSERNAME=$USER
 fi
 
 logger -t "linuxcaib-login-drives($USER)" -s "#Carregam unitats compartides"
@@ -226,13 +249,6 @@ if ( ! paquetInstalat "wget" ); then
         logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: cal instalar el paquet wget (sudo apt-get install wget)"
         exit 1;
 fi
-
-if [ $USER = "root"  ]; then
-        logger -t "linuxcaib-conf-drives($USER)" "ERROR: no se pot executar com a root!"
-        echo "#Error configurant drives (usuari root)"
-        exit 1;
-fi
-
 
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "DEBUG=$DEBUG, usuari='$USERNAME', resta parametres no emprats: $@"

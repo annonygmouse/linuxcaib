@@ -115,7 +115,7 @@ El programa "${0##*/}" instala el servidor proxy local (cntlm) i configura les a
 
 Exemples:
     ${0##*/} -c         Emprant fitxer de credencials
-    sudo ${0##*/} -l sebastia -u u8351 -p contrasenya_u83511            Executant via sudo
+    sudo ${0##*/} -l sebastia -u u8351 -p contrasenya_u83511            Executant via sudo amb l'usuari "sebastia"
 EOF
 }
 
