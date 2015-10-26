@@ -15,9 +15,8 @@
 
 
 #Miram si el ShiroKabuto ha estat deshabilitat a nivell global
-if [ -r /opt/caib/linuxcaib/conf/ShiroDisabled ];then
+if [ -r /etc/CAIB/linuxcaib/ShiroDisabled ];then
         logger -t "linuxcaib-conf-shirokabuto($USER)" -s "Gestió de ShiroKabuto deshabilitada"
-# WARN: no hauria d'estar dins /opt/caib/linuxcaib/conf/ShiroDisabled
 fi
 
 #Importam les funcions auxiliars
@@ -171,8 +170,8 @@ if [ $AGE -gt 7 ] || [ "$OLD_SHIRO_PASS" = "\!" ] || [  "$OLD_SHIRO_PASS" = "" ]
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-shirokabuto" -s "Data canvi contrasenya: $(date +%F)"
                 chage -d $(date +%F) ShiroKabuto   #Format data  yyyy-mm-dd
                 #Si està tot bé, actualitzam el hostname associat al ShiroKabuto
-                echo $(hostname) | tee $BASEDIR/conf/ShiroHostname > /dev/null
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-shirokabuto" "Actualitzat fitxer $BASEDIR/conf/ShiroHostname amb el hostname actual associat al ShiroKabuto ($(hostname))"
+                echo $(hostname) | tee /etc/CAIB/linuxcaib/ShiroHostname > /dev/null
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-shirokabuto" "Actualitzat fitxer /etc/CAIB/linuxcaib/ShiroHostname amb el hostname actual associat al ShiroKabuto ($(hostname))"
         else
                 logger -t "linuxcaib-conf-shirokabuto" "ERROR: ShiroKabuto's password could not be changed Error: $UPDATE_SHIRO_PASSWORD_ANSWER"
                 exit 1;

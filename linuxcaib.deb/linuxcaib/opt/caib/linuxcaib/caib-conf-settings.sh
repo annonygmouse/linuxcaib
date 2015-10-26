@@ -24,7 +24,7 @@ else
         BASEDIR_SETTINGS=$( dirname $RUTA_FITXER)
 fi
 
-if [ ! -d $BASEDIR/conf ];then
+if [ ! -d /etc/CAIB/linuxcaib ];then
         [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Carpeta de configuració no trobada. $BASEDIR, posam BASEDIR=\"/opt/caib/linuxcaib\" ."
         BASEDIR="/opt/caib/linuxcaib";
 fi
@@ -34,15 +34,15 @@ fi
 #echo "BASE SETTINGS $BASEDIR_SETTINGS"
 #echo "BASEDIR $BASEDIR"
 #Si existeix fitxer DebugLevel llegim el valor que conté (0,1,2) i sera el nivell de debug
-if [ -f $BASEDIR/conf/DebugLevel ];then
-        DEBUG=$(cat $BASEDIR/conf/DebugLevel )
+if [ -f /etc/CAIB/linuxcaib/DebugLevel ];then
+        DEBUG=$(cat /etc/CAIB/linuxcaib/DebugLevel )
 fi
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Nivell de DEBUG: $DEBUG, BASEDIR=$BASEDIR"
 
 
 #SEYCON_CERT_FILE ha de ser una ruta completa
-if [ -f $BASEDIR/conf/CertificateFile ];then
-        SEYCON_CERT_FILE=$(cat $BASEDIR/conf/CertificateFile)
+if [ -f /etc/CAIB/linuxcaib/CertificateFile ];then
+        SEYCON_CERT_FILE=$(cat /etc/CAIB/linuxcaib/CertificateFile)
 else
         SEYCON_CERT_FILE=$BASEDIR/seycon.cer
 fi
@@ -51,10 +51,10 @@ fi
 
 
 #Servidor del SEYCON
-if [ -f $BASEDIR/conf/SSOServer ];then
+if [ -f /etc/CAIB/linuxcaib/SSOServer ];then
         #Agafam el primer
-        SEYCON_SERVER=$(cat $BASEDIR/conf/SSOServer|cut -d"," -f 1)
-        SEYCON_SERVERS=$(cat $BASEDIR/conf/SSOServer)
+        SEYCON_SERVER=$(cat /etc/CAIB/linuxcaib/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat /etc/CAIB/linuxcaib/SSOServer)
 else
         SEYCON_SERVER=sticlin2.caib.es 
 fi
@@ -62,8 +62,8 @@ fi
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-settings($USER)" -s "Servidor SEYCON emprat: $SEYCON_SERVER"
 
 #Port del seycon server
-if [ -f $BASEDIR/conf/seycon.https.port ];then
-        SEYCON_PORT=$(cat $BASEDIR/conf/seycon.https.port)
+if [ -f /etc/CAIB/linuxcaib/seycon.https.port ];then
+        SEYCON_PORT=$(cat /etc/CAIB/linuxcaib/seycon.https.port)
 else
         SEYCON_PORT=750 #Port del servidor seycon
 fi
@@ -74,8 +74,8 @@ fi
 
 
 #Hostname associat a l'usuari ShiroKabuto
-if [ -f $BASEDIR/conf/ShiroHostname ];then
-        SHIRO_HOSTNAME=$(cat $BASEDIR/conf/ShiroHostname)
+if [ -f /etc/CAIB/linuxcaib/ShiroHostname ];then
+        SHIRO_HOSTNAME=$(cat /etc/CAIB/linuxcaib/ShiroHostname)
 else
         SHIRO_HOSTNAME=""
 fi
@@ -86,8 +86,8 @@ PSERVER="lofiapp1" #Servidor "ofimatica" de P
 PSHARE="pcapp"        #Nom del "share" de P
 
 #servidor nfs de lofiapp
-if [ -f $BASEDIR/conf/lofiapplinux ];then
-        PSERVER_LINUX=$(cat $BASEDIR/conf/lofiapplinux)
+if [ -f /etc/CAIB/linuxcaib/lofiapplinux ];then
+        PSERVER_LINUX=$(cat /etc/CAIB/linuxcaib/lofiapplinux)
         PSHARE_LINUX="pcapplinux"
 else
 	#Valor per defecte

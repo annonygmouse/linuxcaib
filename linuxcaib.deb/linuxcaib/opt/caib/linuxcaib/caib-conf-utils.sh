@@ -98,8 +98,8 @@ SeyconQuery() {
         #PASSWORD=$(grep -i "^password=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         URL=$1
         URLCACHE=$(echo $URL|sed 's/\//_/g')
-        SEYCON_SERVER=$(cat $BASEDIR/conf/SSOServer|cut -d"," -f 1)
-        SEYCON_SERVERS=$(cat $BASEDIR/conf/SSOServer)
+        SEYCON_SERVER=$(cat /etc/CAIB/linuxcaib/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat /etc/CAIB/linuxcaib/conf/SSOServer)
  
 #        SEYCON_SERVER="sticlin2.caib.es"
 #        SEYCON_SERVERS="sticlin2.caib.es,stsmlin3.caib.es"
@@ -196,8 +196,8 @@ getSeyconUrl() {
         USERNAME=$1
         PASSWORD=$1
         URL=$3
-        SEYCON_SERVER=$(cat $BASEDIR/conf/SSOServer|cut -d"," -f 1)
-        SEYCON_SERVERS=$(cat $BASEDIR/conf/SSOServer)
+        SEYCON_SERVER=$(cat /etc/CAIB/linuxcaib/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat /etc/CAIB/linuxcaib/SSOServer)
         #obtenir return value i desar output a una variable
         #segons codi return intentar tornar a intentar-ho contra l'altre servidor seycon
         #fer echo del resultat del seycon

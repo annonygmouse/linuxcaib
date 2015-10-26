@@ -90,7 +90,7 @@ fi
 if [ -d /media/P_$PSHARE/caib/linuxcaib/ ];then
         rutaRsyncRules="/media/P_$PSHARE/caib/linuxcaib/conf"
 else
-        rutaRsyncRules="/opt/caib/linuxcaib/conf"
+        rutaRsyncRules="/etc/CAIB/linuxcaib"
 fi
 includerules="$rutaRsyncRules/rsync-perfil-mobil-include.rules"
 excluderules="$rutaRsyncRules/rsync-perfil-mobil-exclude.rules"
