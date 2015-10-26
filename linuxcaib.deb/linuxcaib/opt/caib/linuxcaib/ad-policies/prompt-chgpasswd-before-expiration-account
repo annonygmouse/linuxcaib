@@ -37,7 +37,7 @@ canviar_password () {
         fi
 }
 
-[ "$DEBUG" -ge "0" ] && logger -t "prompt-chgpasswd-before-expiration($USER)" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -gt "0" ] && logger -t "prompt-chgpasswd-before-expiration($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
 PASSWORD=$(grep -i "^password=" /var/run/shm/"$USER"/"$USER"_caib_credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ") 
 #echo "Password llegit del fitxer de credencials: $PASSWORD"

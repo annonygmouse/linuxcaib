@@ -159,7 +159,7 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-proxy-server($USER)" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-server($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
 if [ $USER = "root"  ]; then
         echo "localusername=$LOCALUSERNAME"

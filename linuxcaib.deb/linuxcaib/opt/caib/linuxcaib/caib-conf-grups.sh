@@ -87,7 +87,7 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-grups($USER)" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-grups($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

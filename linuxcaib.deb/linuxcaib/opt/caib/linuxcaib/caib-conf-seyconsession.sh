@@ -95,8 +95,8 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionUser=$seyconSessionUser"
-[ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword de $(echo -n $seyconSessionPassword | wc -c ) caràcters "
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionUser=$seyconSessionUser"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword de $(echo -n $seyconSessionPassword | wc -c ) caràcters "
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

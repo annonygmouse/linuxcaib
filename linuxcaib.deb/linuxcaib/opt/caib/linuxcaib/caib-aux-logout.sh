@@ -63,7 +63,7 @@ else
         unset https_proxy
         unset http_proxy
         
-        [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-aux-logout($USER)" -s "seyconSessionUser=$seyconSessionUser"
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-aux-logout($USER)" -s "seyconSessionUser=$seyconSessionUser"
 
         if [ "$seyconSessionUser" != "" ];then
                 USUSEYCON=$seyconSessionUser

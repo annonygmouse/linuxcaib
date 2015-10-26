@@ -309,8 +309,8 @@ case "$1" in
 		dpkg-divert --add --package ${PKG} --rename \
 		        --divert /etc/$f.original /etc/$f
 		if [ \! -e /etc/$f -o -L /etc/$f ]; then 
-		        echo "Creant symlink /etc/$f cap /etc/CAIB/$f"
-		        ln -sf /etc/CAIB/$f /etc/$f
+		        echo "Creant symlink /etc/$f cap /etc/caib/$f"
+		        ln -sf /etc/caib/$f /etc/$f
 		fi
 	done
 

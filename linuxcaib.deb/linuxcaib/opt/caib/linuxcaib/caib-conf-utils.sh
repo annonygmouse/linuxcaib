@@ -98,8 +98,8 @@ SeyconQuery() {
         #PASSWORD=$(grep -i "^password=" /home/$USER/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         URL=$1
         URLCACHE=$(echo $URL|sed 's/\//_/g')
-        SEYCON_SERVER=$(cat /etc/CAIB/linuxcaib/SSOServer|cut -d"," -f 1)
-        SEYCON_SERVERS=$(cat /etc/CAIB/linuxcaib/conf/SSOServer)
+        SEYCON_SERVER=$(cat /etc/caib/linuxcaib/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat /etc/caib/linuxcaib/conf/SSOServer)
  
 #        SEYCON_SERVER="sticlin2.caib.es"
 #        SEYCON_SERVERS="sticlin2.caib.es,stsmlin3.caib.es"
@@ -196,8 +196,8 @@ getSeyconUrl() {
         USERNAME=$1
         PASSWORD=$1
         URL=$3
-        SEYCON_SERVER=$(cat /etc/CAIB/linuxcaib/SSOServer|cut -d"," -f 1)
-        SEYCON_SERVERS=$(cat /etc/CAIB/linuxcaib/SSOServer)
+        SEYCON_SERVER=$(cat /etc/caib/linuxcaib/SSOServer|cut -d"," -f 1)
+        SEYCON_SERVERS=$(cat /etc/caib/linuxcaib/SSOServer)
         #obtenir return value i desar output a una variable
         #segons codi return intentar tornar a intentar-ho contra l'altre servidor seycon
         #fer echo del resultat del seycon
@@ -908,7 +908,7 @@ fi
 #Si no existeix la variable "USER" miram d'emprar "PAM_USER"
 if [ -z $USER ];then
         if [ ! -z $PAM_USER ];then
-                [ "$DEBUG" -ge "0" ] && logger -t "linuxcaib-conf-utils" "Emprant USER=PAM_USER ($PAM_USER)"
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-utils" "Emprant USER=PAM_USER ($PAM_USER)"
                 USER=$PAM_USER
         fi
 fi
