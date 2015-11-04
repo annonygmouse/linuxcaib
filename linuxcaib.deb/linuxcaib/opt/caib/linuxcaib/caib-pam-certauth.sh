@@ -58,7 +58,7 @@ if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
 fi
 
 #Si existeix fitxer DEBUG_PAM llegim el valor que conté (0,1,2) i sera el nivell de debug
-if [ -f $BASEDIR/DEBUG_PAM ];then
+if [ -f /etc/caib/linuxcaib/DEBUG_PAM ];then
         DEBUG=$(cat $BASEDIR/DEBUG_PAM )
 fi
 

@@ -46,7 +46,7 @@ logger -t "linuxcaib-lightdm-setup($USER)" "Ja tenim ping!"
 
 okAvisLegal="1";
 
-if [ -f /etc/caib/dissoflinux/disableAvisLegal ];then
+if [ -f /etc/caib/linuxcaib/disableAvisLegal ];then
         #Avis Legal deshabilitat
         okAvisLegal=0;
 fi

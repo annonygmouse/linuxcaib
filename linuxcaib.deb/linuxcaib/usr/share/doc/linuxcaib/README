@@ -34,23 +34,25 @@ CONFIGURACIÓ
         Hi ha diferents paràmetres per desactivar alguna funcionalitat, per
 activar-los, basta crear el fitxer buid corresponent:
         Nom fitxer                                      Funcionalitat
-        /etc/caib/linuxcaib/DEBUG_PAM                   Habilita el DEBUG en la fase PAM
-        /etc/caib/dissoflinux/disabledissofd            Deshabilita el daemon del dissof
-        /etc/caib/dissoflinux/disabledissofadmin        Deshabilita l'execució del dissof (com administrador)
-        ~/.caib/dissoflinux/disabledissofadmin          Deshabilita l'execució del dissof (com administrador)
+        /etc/caib/linuxcaib/DebugLevel                  Habilita el DEBUG en tots els scripts de linuxcaib ( ha de contenir el nombre 0,1 o 2)
+        /etc/caib/linuxcaib/DEBUG_PAM                   Habilita el DEBUG en la fase PAM ( ha de contenir el nombre 0,1 o 2)
         /etc/caib/linuxcaib/disablesessiondaemon        Deshabilita el daemon del control de multisessió
         /etc/caib/linuxcaib/disableperfilmobil          Deshabilita la sincronització del perfil mòbil
-        ~/.caib/dissoflinux/disableperfilmobil          Deshabilita la sincronització del perfil mòbil
-        /etc/caib/mazinger/disablemazinger              Deshabilita el mazinger (injecció de contrasenyes)
-        ~/.caib/mazinger/disablemazinger                Deshabilita el mazinger (injecció de contrasenyes)
-        /etc/caib/linuxcaib/enableloadmonitor           Habilita el monitor de càrrega (caib-load-monitor)
-        ~/.caib/linuxcaib/enableloadmonitor             Habilita el monitor de càrrega (caib-load-monitor)
+        /etc/caib/dissoflinux/disabledissofd            Deshabilita el daemon del dissof
+        /etc/caib/dissoflinux/disabledissofadmin        Deshabilita l'execució del dissof (com administrador)
         /etc/caib/dissoflinux/disabledissofuser         Deshabilita l'execució del dissof (com usuari)
-        ~/.caib/dissoflinux/disabledissofuser           Deshabilita l'execució del dissof (com usuari)
+        /etc/caib/mazinger/disablemazinger              Deshabilita el mazinger (injecció de contrasenyes)
         /etc/caib/linuxcaib/disableconfprinters         Deshabilita la configuració de impressores
-        /etc/caib/dissoflinux/disableAvisLegal          Deshabilita l'avís legal d'inici de sessió de lightdm
+        /etc/caib/linuxcaib/disableAvisLegal            Deshabilita l'avís legal d'inici de sessió de lightdm
         /etc/caib/linuxcaib/disableShiro                Deshabilita la sincronització de contrasenya del ShiroKabuto
         /etc/caib/linuxcaib/allowKerberosUsers          Permet fer login amb usuaris autenticats només via kerberos (no winbind)
+        /etc/caib/linuxcaib/enableloadmonitor           Habilita el monitor de càrrega (caib-load-monitor)
+
+        ~/.caib/linuxcaib/enableloadmonitor             Habilita el monitor de càrrega (caib-load-monitor)
+	~/.caib/dissoflinux/disabledissofadmin          Deshabilita l'execució del dissof (com administrador)
+        ~/.caib/dissoflinux/disableperfilmobil          Deshabilita la sincronització del perfil mòbil
+        ~/.caib/dissoflinux/disabledissofuser           Deshabilita l'execució del dissof (com usuari)
+        ~/.caib/mazinger/disablemazinger                Deshabilita el mazinger (injecció de contrasenyes)
 
         Per exemple, si volem desactivar el mazinger, podem crear el fitxer a nivell d'usuari fent:
         touch ~/.caib/mazinger/disablemazinger
@@ -64,6 +66,7 @@ d'error i debug (si activat).
         Executant:
         grep linuxcaib /var/log/syslog 
         veurem tot el log de linuxcaib
+	També s'ha creat la utilitat caib-logs-linuxcaib que envia els logs de linuxcaib a un fitxer temporal.
 
 
 DEBUG
