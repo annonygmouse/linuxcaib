@@ -183,6 +183,7 @@ if  [ "$(cat $RUTAPIDCNTLM)" != "" ];then
         #Hi ha un cntlm anterior d'aquest usuari JA en marxa, el tancam.
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "WARN: Ja hi ha un procés cntlm d'aquest usuari en marxa (pid=$(cat $RUTAPIDCNTLM)). El tancam."
         kill $(cat $RUTAPIDCNTLM)  
+        sleep 1;
         rm $RUTAPIDCNTLM
 fi
 
@@ -831,5 +832,24 @@ instalarCertificatsProxy
 # env
 
 echo "# Aplicacions proxificades"
+
+if [  "$PROXYSERVER_LOCAL" != "PROXYLOCALNOCONFIGURAT" ]; then
+        # Si s'empra CNTLM podem configurar el proxychains
+        if [ ! -f $HOME/.proxychains/proxychains.conf ];then
+                echo "# Configurant proxychains" 
+                mkdir -p $HOME/.proxychains/
+                echo "#
+#Configuracio de proxychains de la caib per emprar el proxy local
+strict_chain
+quiet_mode
+# Some timeouts in milliseconds
+tcp_read_time_out 15000
+tcp_connect_time_out 8000
+[ProxyList]
+http 127.0.0.1 3128
+" | tee $HOME/.proxychains/proxychains.conf > /dev/null
+        fi
+fi
+
 
 exit 0;
