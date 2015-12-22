@@ -79,6 +79,7 @@ perfilmontat=$perfilmontat/linux_profile
 
 #Si P: esta montada, agafam rsync-perfil-mobil*.rules de P: així se poden actualitzar les regles remotament
 #Detectam la carpeta P
+PSHARE=""
 if [ -d /media/P_pcapplinux/caib/ ];then
 	PSHARE=pcapplinux
 else

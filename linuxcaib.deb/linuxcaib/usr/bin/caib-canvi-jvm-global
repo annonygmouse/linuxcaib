@@ -13,7 +13,7 @@ fi
 
 show_caib_canvi_jvm_global_help () {
 cat << EOF
-Afageix el certificat passat per paràmetre als navegadors i JAVA de l'usuari.
+Canvia la màquina virtual java per defecte
 
 Ús: ${0##*/} [-ha]
 

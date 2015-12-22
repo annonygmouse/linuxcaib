@@ -104,6 +104,7 @@ echo "20" ; echo "# Netejant javaws";sleep $SLEEP
 #Configuram la part d'usuari del proxy
 
 #Si hi ha P de linux montada, l'empram, en cas contrari, empram la P de windows
+PSHARE=""
 if [ -d /media/P_pcapplinux/caib/ ];then
 	PSHARE=pcapplinux
 else

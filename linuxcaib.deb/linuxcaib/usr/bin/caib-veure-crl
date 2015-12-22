@@ -12,13 +12,25 @@ fi
 #wget -q --no-check-certificate -O -  $1   | openssl crl -inform DER -text -noout
 
 
+fitxerCRL="";
 case "$( echo $1| awk -F : '{ print $1}')" in
         "http"|"https")
-                wget -q --no-check-certificate -O -  $1   | openssl crl -inform DER -text -noout;
+                tmpFile=$(mktemp)
+                wget -q --no-check-certificate -O -  $1 > $tmpFile
+                fitxerCRL=$tmpFile
         ;;
         *)
-                cat "$1"   | openssl crl -inform DER -text -noout;
+                fitxerCRL=$1
         ;;
 esac
+echo "hola"$fitxerCRL
+esPEM=$(grep -q "BEGIN" "$fitxerCRL" && echo "SI")
+if [ "$esPEM" != "SI" ];then
+                cat $fitxerCRL  | openssl crl -inform DER -text -noout;
+else
+                cat $fitxerCRL  | openssl crl -inform PEM -text -noout;
+fi
+
+  
 
 

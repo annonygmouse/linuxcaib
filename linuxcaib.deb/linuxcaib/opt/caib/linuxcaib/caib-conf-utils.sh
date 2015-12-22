@@ -895,7 +895,7 @@ instalaCertChrome $rutaCert  $nomCert "C,,"
 
 #Afageixo els certificats del proxy dins del jssecerts de l'usuari ja que dins JAVA no es poden afegir aquí, ja que cal ser root per poder canviar el keystore
 if [ -r $HOME/.java/deployment/security/trusted.jssecerts ];then
-        keytool -import -noprompt -trustcacerts -alias $nomCert -file $rutaCert -keystore "$HOME/.java/deployment/security/trusted.jssecerts" -storepass ""
+        keytool -import -noprompt -trustcacerts -alias $nomCert -file $rutaCert -keystore "$HOME/.java/deployment/security/trusted.cacerts" -storepass ""
 else
         logger -t "linuxcaib-conf-utils(instalaCertificat-$USER)" -s "WARN: no he pogut afegir els certificats dels proxies al trusted.jssecerts) de l'usuari"
 fi
