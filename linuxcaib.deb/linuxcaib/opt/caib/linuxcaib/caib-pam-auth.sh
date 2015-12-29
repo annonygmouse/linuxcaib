@@ -167,12 +167,16 @@ seycon_login () {
                         exit 1;
                 ;; 
         "EXPIRED")     #En teoria aquí no hauria d'entrar mai, ja que qui realment valida la contrasenya és l'AD.
-                       if [ "$DISPLAY" != ":0.0" -a  "$DISPLAY" != ":0" ];then
-                                logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s  "ERROR: La contrasenya ha expirat\nIntentau entrar a http://intranet.caib.es amb un navegador i canviar la contrasenya.\nO sol·licitau una nova contrasenya al 77070. Vegueu http://suport.caib.es"
-                        else
-                                zenity --timeout 10 --width=200 --error --title="Accés a la xarxa corporativa" --text="ERROR: La contrasenya ha expirat\nIntentau entrar a http://intranet.caib.es amb un navegador i canviar la contrasenya.\nO sol·licitau una nova contrasenya al 77070. Vegueu http://suport.caib.es\nAquest dialeg se tancara en 10 segons"
-                        fi
-                        exit 1;
+		       #ERROR / BUG si la contrasenya expira avui (encara que expiri a una hora més tard, el seycon ens diu que la contrasenya ha expirat!
+		       #Dins del PAM ho hem d'ignorar!
+		       if [ "$DISPLAY" != ":0.0" -a  "$DISPLAY" != ":0" ];then
+				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s  "ERROR: La contrasenya expira avui, per canviar-la heu de executar \"caib-chpasswd\". Un cop canviada la contrasenya, heu de reiniciar la sessió"
+				exit;
+		       else 
+				zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="La contrasenya caduca AVUI, l'haureu de canviar i reiniciar la sessió" &
+				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ERROR/TODO: si la contrasenya caduca avui no podem fer login via seycon (si via AD) pero no puc canviar la contrasesnya aqui, cal fer-ho dins xsession!"
+				exit;
+			fi
                 ;;
         esac
 
