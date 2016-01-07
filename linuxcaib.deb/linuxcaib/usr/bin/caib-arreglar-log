@@ -16,4 +16,4 @@ fi
 fitxerTmp=$(mktemp)
 iconv -f latin1 -t ascii//TRANSLIT $1 > $fitxerTmp
 mv $1 /tmp/
-mv $fitxerTmp $1
+mv -f $fitxerTmp $1

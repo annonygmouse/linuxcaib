@@ -10,6 +10,12 @@
 
 # L'script detecta si l'unitat ja està montada i no la torna a montar.
 
+# TODO: DIVIDIR AQUEST SCRIPT EN DOS un per montar les unitats que no s'han de desmontar en fer logout i 
+# que només pot montar root 
+# i un altre (caib-conf-drives-user.sh) que empri gvfs-mount per les unitats compartides windows de l'usuari (si esteim loguejats amb winbind)
+# gvfs-mount smb://SERVIDOR/[SHARE]
+# http://stackoverflow.com/questions/483460/how-to-mount-from-command-line-like-the-nautilus-does
+
 # Aquest script s'ha d'executar amb permissos de administrador ( o mitjançant sudo).
 
 # L'script empra usuari/password agafats del fitxer credentials o passats per paràmetre.
