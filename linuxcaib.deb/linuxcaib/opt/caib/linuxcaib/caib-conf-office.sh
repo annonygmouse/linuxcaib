@@ -30,7 +30,6 @@ configurarPlantillesLibreOffice () {
 
 #Configuració de LibreOffice v4
 if [ -d $HOME/.config/libreoffice/4/ ];then
-        #TODO: cercar on se configura la ruta de les plantilles!!!! 
         #.config/libreoffice/4/user
         #Per defecte la ruta és $HOME/.config/libreoffice/4/user/template
         #La configuració està dins: $HOME/.config/libreoffice/4/user/registrymodifications.xcu

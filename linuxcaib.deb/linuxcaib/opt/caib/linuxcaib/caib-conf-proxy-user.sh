@@ -27,14 +27,6 @@ HOSTNAME=$(hostname)
 #User agent que emprara el CNTLM de la distribució (imprescindible per a que l'autenticació pugui ser NTLM).
 CNTLM_USERAGENT="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/29.0" 
 
-#Agafam les excepcions que hi ha dins PACCAIB.txt i haurem de posar dins els "noproxy".
-#Aquest codi està duplicat de caib-conf-proxy-user.sh (actualitzarPAC) TODO: treure a funció comu???
-#hostnamesDirectes=`grep DIRECT $HOME/.caib/PACCAIB_LINUX.txt  | grep host== | awk 'BEGIN {FIELDWIDTHS = "2 1"} {print $2}' | awk 'BEGIN { FS = "\"" } ; { print $2"," }' | sed ':a;N;$!ba;s/\n/ /g'`
-#networksDirectes=`grep DIRECT $HOME/.caib/PACCAIB_LINUX.txt | grep isInNet | awk 'BEGIN { FS = "\"" } ; { print $2"," }' | sed ':a;N;$!ba;s/\n/ /g'`
-#dominisDirectes=`grep DIRECT $HOME/.caib/PACCAIB_LINUX.txt  | grep dnsDomain |  awk 'BEGIN { FS = "\"" } ; { print $2"," }' | sed ':a;N;$!ba;s/\n/ /g'`
-
-
-
 #Importam les funcions auxiliars
 #Ruta base scripts
 BASEDIR=$(dirname $0)
@@ -378,7 +370,7 @@ if [ -f .java/deployment/deployment.properties ]; then
         #Primer de tot llevam el que hi pugui haver de configuració del proxy a java
         javaProxyOff
 
-        #TODO: si hi ha instalada la 1.6 el PACCAIB no funciona! S'ha d'emprar "use browser settings".
+        #Si hi ha instalada la 1.6 el PACCAIB no funciona! S'ha d'emprar "use browser settings".
         #es a dir, no hi ha d'haver "deployment.proxy.type"
 
         versioJava=$(cat ~/.java/deployment/deployment.properties|grep jre.0.platform|cut -d= -f 2)

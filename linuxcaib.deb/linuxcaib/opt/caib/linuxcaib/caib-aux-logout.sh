@@ -19,7 +19,7 @@ fi
 
 if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
         logger -t "linuxcaib-aux-logout($USER)" -s "CAIB_CONF_SETTINGS=$CAIB_CONF_SETTINGS Carregam utils de $BASEDIR/caib-conf-utils.sh"
-        #TODO: carregat utils i settings !!!!!
+        #Carregam utils i settings !!!!!
         /opt/caib/linuxcaib/caib-conf-utils.sh
 fi
 

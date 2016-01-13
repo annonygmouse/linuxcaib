@@ -175,7 +175,8 @@ while true; do
                                 if [ "$userNoCloseSession" = "N" ];then
                                         zenity --question --timeout=60 --title="caib-load-monitor" --text="El problema de càrrega persisteix, voleu tancar la sessió?\nSi no contestau en 60 segons se tancarà la sessió"
                                         if [ "$?" = "0" -o "$?" = "5" ];then
-                                                logger -t "linuxcaib-load-monitor($USER)" -s "TODO: sortint de sessió perque l'usuari ha acceptat o timeout. Càrrega: ($load1m)"
+                                                logger -t "linuxcaib-load-monitor($USER)" -s "Sortint de sessió perque l'usuari ha acceptat o timeout. Càrrega: ($load1m)"
+                                                gnome-session-quit --logout --no-prompt
                                         else
                                                 userNoCloseSession="S"
                                                 logger -t "linuxcaib-load-monitor($USER)" -s "L'usuari NO vol que tanquem la sessió ($load1m)"

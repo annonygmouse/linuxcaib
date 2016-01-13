@@ -183,13 +183,14 @@ if [ -d /media/P_"$PSHARE"/caib/dissoflinux ];then
                  logger -t "linuxcaib-lightdm-login($USER)"  "INFO: iniciant dissof com administrador"
                 #El HOME ha de ser /tmp !!!! ja que sinó se creen fitxers de configuració ".conf i .gconf" amb propietari "root" dins el HOME de l'usuari.
                 HOME=/tmp PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin xterm -T "instal·lant components com administrador" -e "/usr/bin/caib-dissof | tee /tmp/caib-dissof-admin-$(date +%Y%m%d_%H%M%S).log ; sleep 5s"
-                 logger -t "linuxcaib-lightdm-login($USER)"  "INFO: resultat execució dissof com administrador: $?"
+                 logger -t "linuxcaib-lightdm-login($USER)"  "INFO: resultat execució dissof com administrador: $?, desat log a /tmp/caib-dissof-admin-*.log"
                  #TODO: hem de recollir el resultat, Per saber si ha anat bé o no!
                 ) | /usr/bin/zenity  --progress --title="Instal·lant components de sistema" --text="Instal·lant components de sistema" --pulsate --no-cancel --auto-close 
         else
                 logger -t "linuxcaib-lightdm-login($USER)" "INFO: dissof de sistema deshabilitat (/etc/caib/dissoflinux/disabledissofadmin)"
         fi
 else
+        logger -t "linuxcaib-lightdm-login($USER)" "ERROR: la unitat de xarxa ofimàtica (lofiapp) NO està montada, no es pot executar el DISSOF!"
         /usr/bin/zenity --timeout 10  --error --title="Instal·lant components de sistema" --text="ERROR: la unitat de xarxa ofimàtica (lofiapp) NO està montada.\nNo es poden instal·lar actualitzacions del sistema (dissof)\n\nAquest dialeg se tancara en 10 segons"
 fi
 

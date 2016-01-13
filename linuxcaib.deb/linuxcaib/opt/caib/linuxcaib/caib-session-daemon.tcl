@@ -3,7 +3,7 @@
 #Emprat per respondre a les peticions "WHO" del seycon per mantenir la sessió oberta.
 
 #Mostrar alertes en rebre la comanda "ALERT"
-#TODO: També hauria de tancar la sessió en notificar-li... 
+#Tanca la sessió en notificar-li.
 
 #Codi tret de: http://wiki.tcl.tk/15315
 
@@ -60,10 +60,10 @@ proc accept {chan addr port} {           ;# Make a proc to accept connections
                                 set err_alert [ catch { exec zenity --timeout 20 --warning --text "$contingutAccio\n\nAquest missatge se tancara en 20 segons"} resultat_alert]
                              }
                     "KEY"  {  
-                                puts $logchan "TODO: Es una peticio de actualització de secrets! ($contingutAccio)"
+                                puts $logchan "IGNORE: Es una peticio de actualització de secrets! ($contingutAccio)"
                            }
                     "APP"  {  
-                                puts $logchan "TODO: Es una peticio de permissos a aplicació! ($contingutAccio)"
+                                puts $logchan "IGNORE: Es una peticio de permissos a aplicació! ($contingutAccio)"
                            }
                     "LOGOUT"  {  
                                 puts $logchan "Rebuda petició de logout!"
@@ -71,7 +71,8 @@ proc accept {chan addr port} {           ;# Make a proc to accept connections
                                         puts $logchan "Rebuda petició de logout!"
      					flush $logchan
                                         set err_alert [ catch { exec zenity --timeout 20 --warning --text "ALERTA: Rebuda petició de logout.\n\nES TANCARÀ LA SESSIÓ EN 20 SEGONS, desau els documents que estigueu emprant" &} resultat_alert]
-                                        puts $logchan "TODO: HEM DE FER LOGOUT per ara només tancam aquest procés, hauriem de fer sessionlogout"
+                                        puts $logchan "Feim logout de sessio"
+                                        exec gnome-session-quit --logout --no-prompt
      					flush $logchan
 					close $chan
 					close $logchan

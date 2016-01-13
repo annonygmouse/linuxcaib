@@ -4,6 +4,15 @@
 #Si es passa un paràmetre ha de ser la versió de l'API de firma que es vulgui instal·lar
 
 apifirmaVersio=4.2.1
+
+
+lastAPIVersion=$(wget -q https://www.caib.es/signaturacaib/ -O- | grep "Jar firmado," index.html |grep signaturacaib.core.*jar -o|awk -F- '{print $2}')
+
+if [ "$lastAPIVersion" != "" ];then
+        echo "Darrera versió API firma: $lastAPIVersion"
+        apifirmaVersio=$lastAPIVersion
+fi
+
 jvmdir=$(dirname $(readlink /etc/alternatives/java) | cut -d/ -f1-5)
 
 #Si debug no està definida, la definim
@@ -59,16 +68,16 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 
-#TODO: descarregar de archiva!
-#wget http://archiva.gforge.caib.es/....../
 
+echo "Descarregant de l'archiva l'api de firma versió $apifirmaVersio"
+wget -q http://gforge.caib.es/archiva/repository/internal/signaturacaib/signaturacaib.install4j/$apifirmaVersio/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar -O /tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar
 if [ -f /tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar ];then
 	if [ -d $jvmdir/jre ];then
 		echo "Es una JDK, install dins jre interna!"
 		jvmdir=$jvmdir"/jre"
 	fi 
 	echo "Instal·lant: signaturacaib.install4j-$apifirmaVersio-installer-lin.jar dins $jvmdir"
-	java -jar $HOME/tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar -dev -jvm:$jvmdir
+	java -jar /tmp/signaturacaib.install4j-$apifirmaVersio-installer-lin.jar -dev -jvm:$jvmdir
 else
 	echo "S'ha de posar l'instal·lador signaturacaib.install4j-$apifirmaVersio-installer-lin.jar dins /tmp"
 fi

@@ -101,14 +101,14 @@ else
         barra=10
         for unitat in $(/bin/df -P  | grep $USER | grep -v $PSERVER_LINUX | grep -v $PSERVER | awk 'BEGIN  { FS=" "} {print $6}');do
                 echo "# Desmontant unitat ($unitat)"
-                umount $unitat
+                result=$(umount $unitat)
                 sync
                 #Comprovam que el umount ha anat bé i podem esborrar el directori
                 if [ "$(/bin/df -P  | grep $unitat )" != "" ];then
                         logger -t "caib-lightdm-logout($USER)" "ERROR: desmontant unitat ($unitat)!"
                         echo "# ERROR: desmontant unitat ($unitat)";sleep 5;
                 else
-                        logger -t "caib-lightdm-logout($USER)" "Desmontada unitat ($unitat) correctament!"
+                        logger -t "caib-lightdm-logout($USER)" "Desmontada unitat ($unitat) correctament podriem eliminar directori, per ara no ho feim!"
                 fi
                 barra=$((barra=barra+1)) 
                 sleep 0.5

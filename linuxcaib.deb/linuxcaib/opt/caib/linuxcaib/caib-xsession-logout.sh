@@ -51,9 +51,15 @@ else
         barra=10
         for unitat in $(/bin/df -P  | grep $USER | grep -v $PSERVER_LINUX | grep -v $PSERVER | awk 'BEGIN  { FS=" "} {print $6}');do
                 echo "# Desmontant unitat ($unitat)"
-                umount $unitat
+                result=$(umount $unitat)
+                resultUmount=$?
                 sync
-                #TODO: comprovar que el umount ha anat bé i podem esborrar el directori.
+                if [ "$(/bin/df -P  | grep $unitat )" != "" ];then
+                        logger -t "caib-xsession-logout($USER)" "ERROR: desmontant unitat ($unitat): $result"
+                        echo "# ERROR: desmontant unitat ($unitat): $result";sleep 5;
+                else
+                        logger -t "linuxcaib-xsession-logout($USER)" "Unitat ($unitat) desmontada correctament, podriem esborrar el directori... per ara no ho feim"
+                fi
                 barra=$((barra=barra+1)) 
                 sleep 0.5
         done;
