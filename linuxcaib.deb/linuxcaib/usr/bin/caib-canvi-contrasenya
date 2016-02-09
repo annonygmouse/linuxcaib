@@ -1,0 +1,74 @@
+#!/bin/sh
+
+#Script per canviar la contrasenya
+# És un "wrapper" de l'script caib-chgpasswd que s'ha d'executar en terminal
+
+logger -t "caib-canvi-contrasenya($USER)" "usuari=$USER id=$(id -u)"
+
+#Strings que torna kpasswd:
+#Si canvi password OK -> Password changed.
+#Si canvi password no ha anat bé -> Password change rejected
+#Si no s'ha posat el password actual -> kpasswd: Preauthentication failed getting initial ticket
+#Si nous passwords no son iguals -> kpasswd: Password mismatch while reading password
+
+#Si debug no està definida, la definim
+if [ -z $DEBUG ]; then DEBUG=0; fi
+
+
+# L'script que crida és el responsable de reiniciar/sortir sessió.
+# IMPORTANT: aquest script NOMÉS ha de treure per STDOUT "changed" o "password not changed"
+canviar_password () {
+        statusfile=$(mktemp)
+        xterm -title "canvi contrasenya CAIB" -e sh -c 'caib-chgpasswd; echo $? > '$statusfile
+        resultChgPasswd=$(cat $statusfile)
+        rm $statusfile
+        logger -t "caib-canvi-contrasenya($USER)" "DEBUG: resultTxt de canviar password=$resultTxt $resultChgPasswd"
+        if [ "$resultChgPasswd" = "0" ];then
+                zenity --timeout 10 --width=400 --info --title="Accés a la xarxa corporativa" --text="Heu actualitzat la contrasenya correctament\n\nRecordau a canviar la contrasenya abans de $maximumAgePassword dies\n\nEs reiniciarà la vostra sessió.\n\nAquest dialeg se tancara en 10 segons"
+                echo "changed"
+        else
+                zenity --timeout 10 --width=400 --error --title="Accés a la xarxa corporativa" --text="ERROR: No s'ha pogut canviar la contrasenya\n\nAquest dialeg se tancara en 10 segons"
+                echo "password not changed"
+        fi
+}
+
+#Feim que les instruccions només apareixin la primera vegada
+mkdir -p $HOME/.caib/linuxcaib/
+instrCanviContrasenya=$(cat $HOME/.caib/linuxcaib/instrCanviContrasenya);
+if [ "$instrCanviContrasenya" == "" ];then
+        instrCanviContrasenya="1";
+fi
+while [ "$instrCanviContrasenya" != "0" ]; do
+        #zenity --text-info --width=640 --height=580  --ok-label="Tancant en $SECS segons" --cancel-label="Podeu tancar aquest avis en qualsevol moment" --timeout=$SECS  \
+        if [ ! -r /usr/bin/zenity ];then
+                logger -t "linuxcaib-lightdm-setup($USER)" "zenity NO instal·at, emprant xmessage"
+                xmessage "Primer heu de posar la contrasenya actual i despres la nova contrasenya dues vegades"
+                instrCanviContrasenya="$?"
+        else
+                zenity --info --ok-label="D'acord"   \
+                       --title="Instruccions canvi contrasenya" --text="Primer heu de posar la contrasenya actual i després la nova contrasenya dues vegades": 
+                instrCanviContrasenya="$?"
+        fi
+done
+echo "$instrCanviContrasenya" > $HOME/.caib/linuxcaib/instrCanviContrasenya
+
+result=$(canviar_password)
+logger -t "caib-canvi-contrasenya($USER)" "Resultat /opt/caib/linuxcaib/ad-policies/caib-canvi-contrasenya($USER)-account  $result"
+if [ "$result" = "changed" ];then
+        logger -t "caib-canvi-contrasenya($USER)" "Canviada contrasenya, hem de tancar la sessió per a que l'usuari se torni a autenticar amb les credencials correctes"
+        #REVISAR
+        zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Contrasenya canviada satisfactòriament.\n En 20 segons es reiniciarà la sessió, tancau els programes oberts." &
+        gnome-session-quit --logout --no-prompt
+        #Ha canviat contrasenya, hem de tornar a fer login!
+        echo "1" > /tmp/"$USER"_forceLogout
+        exit 1
+else 
+        if [ "$result" = "" ];then
+                logger -t "caib-canvi-contrasenya($USER)" "No cal canviar la contrasenya o l'usuari no l'ha volgut canviar ara."
+        else 
+                logger -t "caib-canvi-contrasenya($USER)" -s "ERROR canviant contrasenya: $result."
+        fi
+fi
+
+exit $RETURN
+

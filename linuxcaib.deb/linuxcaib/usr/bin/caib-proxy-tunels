@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# DEPRECAT!!!! És més senzill emprar proxychains!!!!
+# Ho deix per si alguna aplicació no funciona amb proxychains
+#
+
+# Script per gestionar tunels proxy per aquelles aplicacions que no saben agafar la configuració del proxy local
+# Ús:
+#       Crear un tunel nou cap a wikipedia:443 
+#       caib-proxy-tunels start wikipedia:433
+#       Aturar el tunel cap a wikipedia:433
+#       caib-proxy-tunels stop wikipedia:433
+#       Veure els tunels proxy actius
+#       caib-proxy-tunels statuts
+
+
+proxy1="$(host rproxy1|awk '{ print $4 }'):3128"
+proxy2="$(host rproxy2|awk '{ print $4 }'):3128"
+proxy3="$(host rproxy3|awk '{ print $4 }'):3128"
+
+proxyActual=$(grep "^Proxy" /run/shm/u83511/u83511_cntlm.conf|awk '{ print $2}')
+
+if [ -x $HTTP_PROXY ];then
+        echo "ERROR: variable proxy no detectada"
+fi
+
+lastUsedPort=7000
+
+if [ ! -f /usr/bin/proxytunnel ];then
+        echo "Cal instal·lar el proxytunnel!"
+        exit 1;
+fi
+
+for portsproxytunnels in $(ps au|grep caib-proxy-tunnel|grep -v grep|awk '{ print $11}'|awk -F__ '{ print $3}')
+do
+        #Hem d'agafar el port amb valor més alt
+        #echo $portsproxytunnels
+        if [ $portsproxytunnels -ge $lastUsedPort ];then
+                lastUsedPort=$portsproxytunnels
+        fi
+done
+
+
+#echo "Darrer port emprat: $lastUsedPort"
+case "$1" in
+        "stop")
+        if [ -z $2 ];then
+                echo "ERROR, cal un destí! ( o \"all\" per aturar tots els tunels) "
+                exit 1;
+        fi
+        if [ "$2" == "all" ];then
+                for tunelpid in $(ps au|grep caib-proxy-tunnel|grep -v grep| awk '{ print $2}')
+                do
+                        kill $tunelpid
+                done
+        else
+                pid=$(ps au|grep caib-proxy-tunnel|grep -v grep|grep "$2" | awk '{ print $2}')
+                port=$(ps au|grep caib-proxy-tunnel|grep -v grep|grep "$2" | awk '{ print $11}'|awk -F__ '{ print $3}')
+                kill $pid
+        fi
+        ;;
+        "start")
+        if [ -z $2 ];then
+                echo "ERROR, cal un destí!"
+                exit 1;
+        fi
+        if ( ! echo $2 | grep -q : );then
+                echo "caib-proxy-tunels: ERROR, l'adreça destí ha de ser de la forma: IP:port!"
+                exit 1;
+        fi
+        if (  ps au|grep caib-proxy-tunnel|grep -v grep|grep -q "$2" );then
+                echo "caib-proxy-tunels: ERROR, l'adreça destí ja ha estat donada d'alta, l'heu de donar de baixa primer!"
+                echo "Llistat de tunels oberts:"
+                $0 status
+                exit 1;
+        fi
+        portEmprar=$(($lastUsedPort + 1 ))
+        nohup proxytunnel  -d $2  -a $portEmprar -x caib-proxy-tunnel__$2__$portEmprar &>/dev/null &
+        if [ "$?" != "0" ];then
+                echo "Creat tunel des de localhost:$portEmprar cap a $2 "
+        else    
+                echo "Creat tunel des de localhost:$portEmprar cap a $2 "
+        fi
+        ;;
+        "status")
+        #echo "Llista de tunels creats: "
+        for tunel in $(ps au|grep caib-proxy-tunnel|grep -v grep|awk '{ print $11}')
+        do
+                origen=$(echo $tunel |awk -F__ '{ print $3}')
+                desti=$(echo $tunel |awk -F__ '{ print $2}')
+                echo "localhost:$origen <--> $desti"
+        done
+        ;;
+        *)
+        echo "ERROR: ús: \ncaib-proxy-tunels start wikipedia:433\nò\ncaib-proxy-tunels stop\nò\ncaib-proxy-tunels status";
+        ;;
+esac
+
+
+exit 0;

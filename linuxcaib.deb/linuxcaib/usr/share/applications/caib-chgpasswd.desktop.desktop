@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Canvi contrasenya
+Exec=/usr/bin/caib-canvi-contrasenya
+MimeType=application/x-sh
+#Icon=Suport_77070
+Terminal=false
+Type=Application
+Categories=caib
+Comment=Aplicació per canviar la contrasenya de la CAIB
+Name[ca]=caib-chgpasswd.desktop

@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Script per aturar temporalment el proxy local cntlm
+# Ús:
+#       Aturar el proxy temporalment
+#       caib-cntlm stop
+#       Tornar a posar en marxa el proxy local aturat amb "stop"
+#       caib-cntlm start
+#       Canviar el proxy emprat i emprar el proxy indicat
+#       caib-cntlm proxy1
+
+
+cntlmPid=$(cat /run/shm/$USER/"$USER"_cntlm.pid 2> /dev/null)
+
+#if [ "$cntlmPid" = "" ];then
+#        echo "WARNING: PID del cntlm NO trobat! -$cntlmPid-"
+#fi
+
+proxy1="$(host rproxy1|awk '{ print $4 }'):3128"
+proxy2="$(host rproxy2|awk '{ print $4 }'):3128"
+proxy3="$(host rproxy3|awk '{ print $4 }'):3128"
+
+proxyActual=$(grep "^Proxy" /run/shm/$USER/"$USER"_cntlm.conf|awk '{ print $2}')
+
+case "$1" in
+        "proxy1"|"proxy2"|"proxy3")
+        echo "proxy3=$proxy3"
+        #eval echo \${$"1"}
+        proxyNou=$(eval echo \${$1})
+        echo "$1 es $proxyNou"
+        if [ "$proxyActual" != "$proxyNou" ];then
+                echo "aturant el cntlm..."
+                kill $cntlmPid
+                echo "canviant de proxy $proxyActual a $1 ($proxyNou)"
+                sed -i 's/'"$proxyActual"'/'"$proxyNou"'/' /run/shm/$USER/"$USER"_cntlm.conf 
+                cntlm -U $USER -c /run/shm/$USER/"$USER"_cntlm.conf -P /run/shm/$USER/"$USER"_cntlm.pid
+        else 
+                echo "El nou proxy és igual que l'anterior, no feim rés"
+                exit 0;
+        fi
+        ;;
+        "pause")
+        echo "pausant cntlm temporalment"
+        kill -s SIGSTOP $cntlmPid;
+        exit 1;
+        ;;
+        "stop")
+        #CNTLM ja esta arrancat, l'activam de nou
+        echo -n "aturant el procés cntlm amb pid ($cntlmPid) "
+        while  [ -f /run/shm/$USER/"$USER"_cntlm.pid ];
+        do
+                echo -n "."
+                kill $cntlmPid;
+                sleep 1;
+        done
+        echo ""
+        if  [ "$(ps aux|grep cntlm|grep -v caib-cntlm|grep -v grep|awk '{ print $2 }')" != "" ];then
+                #Hi ha un cntlm anterior d'aquest usuari JA en marxa, el tancam.
+                logger -t "caib-cntlm($USERNAME)" -s "WARN: Ja hi ha un procés cntlm en marxa (pid=$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }')). El tancam."
+                kill $(ps aux|grep cntlm|grep -v caib-cntlm| grep -v grep|awk '{ print $2 }')
+                if [ "$?" != "0" ];then
+                        logger -t "caib-cntlm($USERNAME)" -s "ERROR: no he pogut aturar el procés cntlm anterior! amb pid=$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }'))."
+                        exit 1;
+                fi  
+        fi
+        ;;
+        "start")
+        cntlm -U $USER -c /run/shm/$USER/"$USER"_cntlm.conf -P /run/shm/$USER/"$USER"_cntlm.pid
+        cntlmPid=$(cat /run/shm/$USER/"$USER"_cntlm.pid 2> /dev/null)
+        echo "iniciat cntlm amb pid ($cntlmPid)"
+        ;;
+        "resume")
+        echo "tornant a activar el cntlm "
+        kill -s SIGCONT $cntlmPid;
+        ;;
+        "restart")
+        if [ -f /run/shm/$USER/"$USER"_cntlm.pid ];then
+                $0 stop
+                $0 start
+        else 
+                #No hi ha pid, l'intentarem arrancar.
+                echo "ctnlm aturat"
+                if [ -f /run/shm/$USER/"$USER"_cntlm.conf ];then
+                        echo "iniciant cntlm"
+                        cntlm -U $USER -c /run/shm/$USER/"$USER"_cntlm.conf -P /run/shm/$USER/"$USER"_cntlm.pid
+                        cntlmPid=$(cat /run/shm/$USER/"$USER"_cntlm.pid 2> /dev/null)
+                        echo "iniciat cntlm amb pid ($cntlmPid)"
+                else
+                        echo "ERROR: no hi ha fitxer de configuració de cntlm, iniciant via caib-conf-proxy-user"
+                        /opt/caib/linuxcaib/caib-conf-proxy-user.sh -c
+                fi
+        fi
+        ;;
+        "status")
+        if [ -f /run/shm/$USER/"$USER"_cntlm.pid ];then
+                echo "Proxy cntlm amb PID $(cat /run/shm/$USER/"$USER"_cntlm.pid) emprant el proxy: ($proxyActual) $(host -W 3 $( echo $proxyActual| awk -F: '{ print $1}') | awk '{ print $5 }')  "
+        else
+                echo "Proxy cntlm aturat"
+        fi
+        ;;
+        *)
+        echo -e "ERROR: ús: \ncaib-cntlm pause\ncaib-cntlm resume\ncaib-cntlm stop\ncaib-cntlm start\ncaib-cntlm restart\ncaib-cntlm proxy1\ncaib-cntlm proxy3\ncaib-cntlm proxy2\ncaib-cntlm status";
+        ;;
+esac
+
+
+exit 0;
