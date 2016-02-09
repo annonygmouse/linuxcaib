@@ -360,6 +360,9 @@ case "$PAM_SERVICE" in
                         exit 1;
                 fi
         ;;
+    "gnome-screensaver")
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s  "No feim res. L'script XXXXX s'executa quan gnome-screensaver informa via dbus que ha bloquejat o desbloquejat"
+        ;;
     "su")
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s  "Que fer en autenticarse via su? "
         ;;

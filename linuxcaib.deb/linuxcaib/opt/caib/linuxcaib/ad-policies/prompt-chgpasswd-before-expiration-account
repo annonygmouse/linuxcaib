@@ -56,7 +56,7 @@ if [ "$passExpirat" != "" ];then
                                 sleep 0.8 && zenity --timeout 5 --width=400 --info --title="Accés a la xarxa corporativa" --text="Usuari $USER, la vostra contrasenya caduca en $daysToExpirePassword dies; heu de canviar la contrasenya\n\nAquest dialeg se tancara en 5 segons" &
                                 sleep 1;
                                 resultatCanviPass=$(canviar_password);
-                                until [ "$resultatCanviPass" != "changed" ];do
+                                while [ "$resultatCanviPass" != "changed" ];do
                                         resultatCanviPass=$(canviar_password);
                                 done
                                 echo "changed"

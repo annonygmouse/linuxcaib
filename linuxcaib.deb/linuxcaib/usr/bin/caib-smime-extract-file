@@ -14,11 +14,18 @@ extensioFitxer=$(echo "$1" | rev | cut -d. -f 1|rev)
 extensioFitxerIntern=$(echo "$1" | rev | cut -d. -f 2|rev)
 nomFitxerIntern=$(echo "$1" | rev | cut -d. -f 3|rev)
 
+if [ "$extensioFitxer" == "$extensioFitxerIntern" ];then
+        echo "ALERTA: fitxer sense extensió"
+        extensioFitxerIntern="desconegut"
+        extensioFitxer="desconegut"
+        nomFitxerIntern=""
+fi
 
 if [ "$nomFitxerIntern" != "" ];then
         case  $extensioFitxer  in
                         "slc")       
                                 openssl smime -verify -noverify -in  $1 -signer $nomFitxerIntern_cadena_certs.pem |sed '1,3d' | base64 -id > "$nomFitxerIntern"."$extensioFitxerIntern"
+                                
                                 echo "Extret document a $nomFitxerIntern.$extensioFitxerIntern"
                                 echo "Extret document a $nomFitxerIntern.$extensioFitxerIntern i la cadena de certificats dins $nomFitxerIntern"_cadena_certs.pem"
 		            ;;
@@ -35,6 +42,7 @@ else
         openssl smime -verify -noverify -in  $1 -signer $extensioFitxerIntern"_extracted_cadena_certs.pem" |sed '1,3d' | base64 -id > $extensioFitxerIntern"_extracted."$extensioFitxer
         echo "Extret document a "$extensioFitxerIntern"_extracted."$extensioFitxer" i la cadena de certificats dins "$extensioFitxerIntern"_extracted_cadena_certs.pem"
         rutaFitxerExtret=$extensioFitxerIntern"_extracted."$extensioFitxer
+        openssl smime -pk7out -in $1 > "$extensioFitxerIntern"_extracted.pk7
 fi
 
 
@@ -45,4 +53,9 @@ if [ "$extensioFitxerResultant" = "pdf" ];then
         acroread $rutaFitxerExtret &
 else
         xdg-open $rutaFitxerExtret & 
+fi
+
+cadenaCerts="$extensioFitxerIntern"_extracted_cadena_certs.pem
+if [ -f $cadenaCerts ];then
+        xdg-open $cadenaCerts & 
 fi

@@ -67,6 +67,7 @@ sleep $LONGSLEEP;
 # /bin/dash /opt/caib/linuxcaib/caib-xdg-userdirs.sh
 
 #Canvi forsat de contrasenya! S'ha de fer en la fase de xsession ja que s'ha d'executar des de sessió d'usuari!
+#TODO: moure aquest codi a una funció/script comú, ja que per ara esta duplicat dins caib-conf-xsession-login.sh i caib-screensaver-check-password.sh
 result=$(dash /opt/caib/linuxcaib/ad-policies/prompt-chgpasswd-before-expiration-account)
 logger -t "linuxcaib-xsession-login($USER)" "Resultat /opt/caib/linuxcaib/ad-policies/prompt-chgpasswd-before-expiration-account  $result"
 if [ "$result" = "changed" ];then
@@ -214,6 +215,10 @@ else
 fi
 #Activam nunlock
 /usr/bin/numlockx on
+
+#Iniciam el "daemon" que escolta per dbus el gnome-screensaver per forçar expiracio contrasenya despres de ficar contrasenya dins gnome-screensaver
+nohup /opt/caib/linuxcaib/caib-screensaver-check-password.sh &
+
 
 fi #Comprovació si usuari te password... si te password és un usuari LOCAL
 
