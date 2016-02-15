@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #TODO: fer que funcioni amb DASH!!!
-#TODO: comprovar que gnome-screensaver estigui en marxa, si no esta en marxa, no té sentit i ha d'acabar la seva execució
 #TODO: millorar que no sigui poling! 
 #http://blog.troyastle.com/2011/06/run-scripts-when-gnome-screensaver.html
 #http://unix.stackexchange.com/questions/28181/run-script-on-screen-lock-unlock
@@ -11,6 +10,12 @@
 
 #ALERTA: aquest script s'ha de iniciar i deixar en background!
 #set -x
+
+if ! ps ux|grep screensaver|grep -q -v grep 
+then
+	logger -t "linuxcaib-screensaver-check-password($USER)" -s "ERROR: gnome-screensaver no iniciat, tancam"
+	exit -1;
+fi
 
 logger -t "linuxcaib-screensaver-check-password($USER)" -s "Inici tasca escoltar dbus del gnome-screensaver per forçar caducitat contrasenya"
 dbus-monitor --session  "type='signal',interface='org.gnome.ScreenSaver'" | \
