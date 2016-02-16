@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 #Per si el LANG no estigues ben posat, en emprar accents al zenity, fallaria.
 #TODO: mirar d'emprar C.UTF-8 !!!!
@@ -39,17 +39,6 @@ LOGFILE=/tmp/pam-script-auth.log
 #Si ja hi ha un usuari (seycon) loguejat (:0.0) NO hem de permetre altres logins de usuaris seycon???
 
 
-EXEUSER=`whoami`
-ENV=$(env)
-echo $stamp Autenticació usuari \
-        usu_id=$(id -u)                                \
-        user=$PAM_USER des de rhost=$PAM_RHOST        \
-        tty=$PAM_TTY                                \
-        args=["$@"]                                \
-        runnint_user=$EXEUSER                        \
-        pwd=$PWD                                \
-        env=$ENV  FI ENV                         \
-        >> $LOGFILE
 
 #echo "BASEDIRPAM=$BASEDIRPAM  BASEDIR: $BASEDIR , RUTA_FITXER=$RUTA_FITXER"
 if [ "$CAIB_CONF_SETTINGS" != "SI" ]; then
@@ -70,13 +59,28 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
+if [ "$DEBUG" -ge 2 ]; then
+        EXEUSER=`whoami`
+        ENV_sense_passw=$(env|sed 's/PAM_AUTHTOK=.*/PAM_AUTHTOK=x/g')
+        echo $stamp Autenticació usuari \
+                usu_id=$(id -u)                                \
+                user=$PAM_USER des de rhost=$PAM_RHOST        \
+                lang=$LANG=
+                tty=$PAM_TTY                                \
+                args=["$@"]                                \
+                runnint_user=$EXEUSER                        \
+                pwd=$PWD                                \
+                env_sense_passw=[ $ENV_sense_passw ]                        \
+                >> $LOGFILE
+fi
+
 obte_info_usuari () {
 
        USER_DATA=$(wget -O - -q --http-user=$PAM_USER --http-password=$PAM_AUTHTOK --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$PAM_USER )
         RESULTM=$?
         if [ ! $RESULTM -eq 0 ];then
                 logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ERROR: dades de l'usuari ($USER) no existeixen, possiblement usuari no dins SEYCON o hi ha un error en la sincronització de contrasenyes."
-                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "https://s$SEYCON_SERVER:$SEYCON_PORT/query/user/$PAM_USER userdata=$USER_DATA"
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)"  "https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$PAM_USER userdata=$USER_DATA"
                 #No donam d'alta un credentials, se crearà en fer login de lightdm
                 zenity --timeout 10 --width=200 --warning --title="Accés a la xarxa corporativa" --text="ERROR, l'usuari no és un usuari de SEYCON o hi ha un error en la sincronització de contrasenyes.\nEsperau 5 minuts i tornau-ho a provar.\n\nAquest dialeg se tancara en 10 segons"
                 exit 1;
@@ -174,7 +178,7 @@ seycon_login () {
 				exit;
 		       else 
 				zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="La contrasenya caduca AVUI, l'haureu de canviar i reiniciar la sessió" &
-				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ERROR/TODO: si la contrasenya caduca avui no podem fer login via seycon (si via AD) pero no puc canviar la contrasesnya aqui, cal fer-ho dins xsession!"
+				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ERROR/TODO: si la contrasenya caduca avui no podem fer login via seycon (si via AD) pero no puc canviar la contrasenya aqui, cal fer-ho dins xsession!"
 				exit;
 			fi
                 ;;

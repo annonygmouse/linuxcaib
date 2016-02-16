@@ -52,15 +52,14 @@ group_id=$5
 
 
 #Primer comprovam si ja esta montat
-#TODO: parsejar "gvfs-mount --list"
-if ( df | grep "$(echo $puntMontatge | sed -e 's/\//\\\//g')">/dev/null );then
+
+if ( gvfs-mount  --list|grep -q "smb://"$unitatCompartida  );then
         #Esta montat, no hem de tornar a montar
-        logger -t "linuxcaib-conf-drives-user($USER)" -s  "Unitat $unitatCompartida ja montada a $puntMontatge."
-        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s  "Línia del fstab: $(df | grep "$(echo $puntMontatge | sed -e 's/\//\\\//g')")"
+        logger -t "linuxcaib-conf-drives-user($USER)" -s  "Unitat $unitatCompartida ja montada via gvfs."
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s  "Línia del gvfs-mount --list : $(gvfs-mount  --list|grep -q smb://$unitatCompartida)"
         return 1
 fi
 
-#TODO: gvfs-mount -m smb://$unitatCompartida
         { MOUNTOUTPUT=$(gvfs-mount -m smb://$unitatCompartida 2>&1 1>&3-) ;} 3>&1
 RESULTM=$?
 
@@ -69,7 +68,7 @@ if [ $RESULTM -eq 0 ];then
    logger -t "linuxcaib-conf-drives-user($USER)" -s  "Montada Unitat $unitatCompartida via gvfs"
    return 0
 else
-        logger -t "linuxcaib-conf-drives-user($USER)" -s "Error ($RESULTM) en montar la unitat $unitatCompartida text error: $MOUNTOUTPUT"                
+        logger -t "linuxcaib-conf-drives-user($USER)" -s "Error ($RESULTM) en montar la unitat //$unitatCompartida text error: $MOUNTOUTPUT"                
         if [ "$DEBUG" -gt "0" ];then
                 logger -t "linuxcaib-conf-drives-user($USER)" -s "Parametres:"
                 logger -t "linuxcaib-conf-drives-user($USER)" -s "Usuari seycon $usuariSeycon"
@@ -93,10 +92,11 @@ Call que l'usuari estigui loguejat dins l'Active Directory mitjançant winbind-p
 Ús: ${0##*/} [-hv]
     
       -h          mostra aquesta ajuda
+      -c          agafa les credencials del fitxer "credentials". IMPORTANT, l'usuari ha de ser l'usuari de SEYCON.
       -v          mode verbose
 
 Exemples:
-        ${0##*/} -v   Execució passant usuari i contrasenya
+        ${0##*/} -c     Execució emprant fitxer de credencials
 EOF
 }
 
@@ -113,6 +113,17 @@ while getopts "hmcv?l:u:p:" opt; do
         show_caib_conf_drives_help
         exit 0
         ;;
+    c)
+        if [ "$seyconSessionUser" != "" ];then
+                USERNAME=$seyconSessionUser
+                PASSWORD=$seyconSessionPassword
+                [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-conf-drives($USER)" -s "INFO: emprant seyconSessionUser i seyconSessionPassword ($USERNAME - amb password de $(echo -n $PASSWORD | wc -c ) caràcters )"
+        else
+                #Com a backup intentam agafar el nom i contrasenya del fitxer credentials que hi ha dins el home de l'usuari.
+                USERNAME=$(grep -i "^username=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+                PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
+        fi     
+        ;;
     v)  DEBUG=1
         ;;
     esac
@@ -121,6 +132,15 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
+
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
+then
+#Si NO tenim usuari i password no podem configurar el proxy local
+    logger -t "linuxcaib-conf-drives-user($USER)" -s "ERROR: Se necessita usuari i contrassenya per poder montar les unitats compartides" >&2
+    show_caib_conf_drives_help
+    exit 1
+fi
 
 
 if [ $USER = "root"  ]; then
@@ -159,8 +179,6 @@ if [ $RESULTM -eq 0 ];then
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "Unitat home de l'usuari esta al servidor: $HOME_DRIVE_SERVER -> montar: //$HOME_DRIVE_SERVER/$USERNAME a la unitat /home/$USU_LINUX/unitat_H"
 
         if  ( isHostNear "$HOME_DRIVE_SERVER" ) ; then
-                mkdir -p /home/$USU_LINUX/unitat_H
-                chown $USER:$USER /home/$USU_LINUX/unitat_H
 
                 RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD //$HOME_DRIVE_SERVER.caib.es/$USERNAME /home/$USU_LINUX/unitat_H $(id $USERNAME -u) )
                 RESULT=$?

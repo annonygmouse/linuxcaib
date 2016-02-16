@@ -10,19 +10,42 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
+
+
+if [ ! -f /usr/bin/mazinger ]; then
+       echo "ERROR: mazinger NO instal·lat!";
+       exit 1;
+fi
+
+
 #Importam les funcions auxiliars
 #Ruta base scripts
 BASEDIR=$(dirname $0)
 if [ "$CAIBCONFUTILS" != "SI" ]; then
         . /opt/caib/linuxcaib/caib-conf-utils.sh
+else
+        echo "ERROR: no he pogut trobar les utilitats (caib-conf-utils)";
+        exit 1;
 fi
+
+
 
 case "$1" in
 "start")
-mazinger start -credentials $(carpetaTempMemoria)/""$USER""/""$USER""_caib_credentials_mazinger $HOME/.caib/mazinger.mzn
+        if [ ! -f $(carpetaTempMemoria)/""$USER""/""$USER""_caib_credentials_mazinger ]; then
+               echo "ERROR: no he pogut trobar el fitxer de credencials ($(carpetaTempMemoria)/""$USER""/""$USER""_caib_credentials_mazinger)";
+                exit 1;
+        fi
+        if [ ! -f $HOME/.caib/mazinger.mzn ]; then
+               echo "ERROR: no he pogut trobar el fitxer de configuració de mazinger ($HOME/.caib/mazinger.mzn)";
+               exit 1;
+        fi
+        mazinger start -credentials $(carpetaTempMemoria)/""$USER""/""$USER""_caib_credentials_mazinger $HOME/.caib/mazinger.mzn
 ;;
 "stop"|"status")
-mazinger $1
+        mazinger $1
 ;;
+*)
+        mazinger status
 esac
 
