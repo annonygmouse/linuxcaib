@@ -302,6 +302,11 @@ case "$1" in
 
 	#No elimin conf-backups antics per tenir un registre de les instal·lacions
 
+	if [ ! -x "/etc/cron.daily/apt" ];then
+		echo "Habilitant execucio de /etc/cron.daily/apt"; 
+		chmod 755 /etc/cron.daily/apt;
+	fi
+
 	#Feim els diverts dels fitxers de configuració
 	#https://wiki.debian.org/ConfigPackages
 	for f in krb5.conf puppet/puppet.conf pam.d/polkit-1 apparmor.d/usr.sbin.cupsd
