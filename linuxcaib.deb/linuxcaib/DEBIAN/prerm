@@ -22,7 +22,7 @@ PKG=linuxcaib
 #Feim els diverts dels fitxers de configuració
 #https://wiki.debian.org/ConfigPackages
 if [ "$1" = remove ] ; then
-        for f in krb5.conf puppet/puppet.conf pam.d/polkit-1 apparmor.d/usr.sbin.cupsd
+        for f in krb5.conf puppet/puppet.conf pam.d/polkit-1 apparmor.d/usr.sbin.cupsd apt/apt.conf.d/50unattended-upgrades
         do
                 if [ -L /etc/$f ];then
                         echo "Eliminant fitxer de configuració propi: /etc/$f"
