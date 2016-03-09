@@ -144,12 +144,14 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 
-if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
-then
-#Si NO tenim usuari i password no podem configurar el proxy local
-    logger -t "linuxcaib-conf-drives-user($USER)" -s "ERROR: Se necessita usuari i contrassenya per poder montar les unitats compartides" >&2
-    show_caib_conf_drives_help
-    exit 1
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ];then
+    #No tenim usuari i password per poder consultar la info de les unitats al seycon
+    if [ ! -f "/var/run/user/$(id -u)/seycon_query_user" ] || [ ! -f "/var/run/user/$(id -u)/seycon_query_user_drives" ];then
+        # Tampoc tenim els fitxers amb la info del seycon, no podem continuar
+        logger -t "linuxcaib-conf-drives-user($USER)" -s "ERROR: Se necessita usuari i contrassenya per poder montar les unitats compartides o tenir els fitxers amb la info de les unitats compartides del seycon dins /var/run/user/$(id -u)/seycon_query_user" >&2
+        show_caib_conf_drives_help
+        exit 1
+    fi
 fi
 
 
@@ -176,10 +178,16 @@ fi
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "DEBUG=$DEBUG, usuari='$USERNAME', resta parametres no emprats: $@"
 
 #Montam la unitat H
+RESULTM=1;
 logger -t "linuxcaib-conf-drives-user($USER)" -s "#Montant unitat H"
-USER_DATA=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$USERNAME )
-RESULTM=$?
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "DEBUG: dades de l'usuari al seycon: $USER_DATA. USUARI de connexió: $USERNAME"
+if [ ! -f /var/run/user/$(id -u)/seycon_query_user ];then 
+        USER_DATA=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$USERNAME )
+        RESULTM=$?
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "DEBUG: dades de l'usuari al seycon: $USER_DATA. USUARI de connexió: $USERNAME"
+else
+        USER_DATA=$(/var/run/user/$(id -u)/seycon_query_user)
+        RESULTM=0
+fi
 
 if [ $RESULTM -eq 0 ];then
         #<data><row> *   <MAQUSU_NOM>lofihom2</MAQUSU_NOM>  </row></data>
@@ -244,8 +252,15 @@ fi
 #Configuram unitats compartides de xarxa
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" "Montant altres unitats"
 
-USER_DRIVES=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$USERNAME/drives )
-RESULTM=$?
+
+if [ ! -f /var/run/user/$(id -u)/seycon_query_user_drives ];then 
+        USER_DRIVES=$(wget -O - -q --http-user=$USERNAME --http-password=$PASSWORD --no-check-certificate https://$SEYCON_SERVER:$SEYCON_PORT/query/user/$USERNAME/drives )
+        RESULTM=$?
+else
+        USER_DRIVES=$(/var/run/user/$(id -u)/seycon_query_user_drives)
+        RESULTM=0
+fi
+
 if [ ! $RESULTM -eq 0 ];then
    logger -t "linuxcaib-conf-drives-user($USER)" -s "# ERROR: no he pogut accedir a les unitats compartides de l'usuari $USERNAME (o no en te)."
    logger -t "linuxcaib-conf-drives-user($USER)" -s "\tCodi d'error (wget): $RESULTM. Resultat d'obtenir les unitats compartides del seycon: $USER_DRIVES."

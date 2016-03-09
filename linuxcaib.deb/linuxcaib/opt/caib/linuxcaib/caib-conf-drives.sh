@@ -216,7 +216,7 @@ shift $((OPTIND-1))
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
-#Si NO tenim usuari i password no podem configurar el proxy local
+#Si NO tenim usuari i password no podem montar les unitats compartides
     logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: Se necessita usuari i contrassenya per poder montar les unitats compartides" >&2
     show_caib_conf_drives_help
     exit 1
@@ -271,7 +271,8 @@ if [ $RESULTM -eq 0 ];then
         #<data><row> *   <MAQUSU_NOM>lofihom2</MAQUSU_NOM>  </row></data>
         xpath="data/row[1]/MAQUSU_NOM"
         HOME_DRIVE_SERVER=$(echo $USER_DATA | xmlstarlet sel -T -t -c $xpath )
-        
+	#Exportam info recuperada del seycon per a que l'empri posteriorment caib-conf-drives-user.sh         
+	echo $USER_DATA > /var/run/user/$(id -u)/seycon_query_user	
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Unitat home de l'usuari esta al servidor: $HOME_DRIVE_SERVER -> montar: //$HOME_DRIVE_SERVER/$USERNAME a la unitat /home/$USU_LINUX/unitat_H"
 
         if  ( isHostNear "$HOME_DRIVE_SERVER" ) ; then
@@ -369,7 +370,10 @@ if [ ! $RESULTM -eq 0 ];then
    logger -t "linuxcaib-conf-drives($USER)" -s "\tCodi d'error (wget): $RESULTM. Resultat d'obtenir les unitats compartides del seycon: $USER_DRIVES."
    exit 1
 fi
+
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Unitats compartides de l'USERNAME: $USER_DRIVES"
+#Exportam info recuperada del seycon per a que l'empri posteriorment caib-conf-drives-user.sh         
+echo $USER_DRIVES > /var/run/user/$(id -u)/seycon_query_user_drives	
 
 #<row><GRU_UNIOFI>G:</GRU_UNIOFI><MAQ_NOM>lofigrp1</MAQ_NOM><GRU_CODI>dgtic</GRU_CODI></row>
 
