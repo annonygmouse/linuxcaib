@@ -11,7 +11,8 @@
 # gvfs-mount smb://SERVIDOR/[SHARE]
 # http://stackoverflow.com/questions/483460/how-to-mount-from-command-line-like-the-nautilus-does
 # TODO: enllaçar cap a la carpetes montades: /var/run/user/94891/gvfs/smb-share\:server\=lofihom3.caib.es\,share\=u83511/
-
+# TODO: fer que caib-conf-drives descarregui els XML de les unitats i aquest script llegeixi els XML
+# catxeades i així no necessiti les credencials.
 # Aquest script s'ha d'executar amb permissos d'usuari
 
 # Pre-requisits: wget, xmlstarlet
@@ -67,8 +68,14 @@ fi
 RESULTM=$?
 
 if [ $RESULTM -eq 0 ];then
-   #TODO: llegir via gvfs-mount --list la informacio que vulguem mostrar per log
-   logger -t "linuxcaib-conf-drives-user($USER)" -s  "Montada Unitat $unitatCompartida via gvfs"
+   servidor= $(echo $unitatCompartida | cut -d/ -f 1 );
+   rutaUnitatMontadaGvfs="";
+   if [ "$(ls /var/run/user/$(id -u)/gvfs/|grep $servidor)" != "" ];then
+	rutaUnitatMontadaGvfs=$(ls /var/run/user/$(id -u)/gvfs/|grep $servidor);
+	logger -t "linuxcaib-conf-drives-user($USER)" -s  " gvfs te montada la unitat compartida del servidor $servidor a gvfs $rutaUnitatMontadaGvfs l'hem de enllaçar a: $rutaUnitatMontadaGvfs $puntMontatge"
+   fi
+   #ln -s $rutaUnitatMontadaGvfs s$puntMontatge
+   logger -t "linuxcaib-conf-drives-user($USER)" -s  "Montada Unitat $unitatCompartida via gvfs i creat symlink a: "
    return 0
 else
         logger -t "linuxcaib-conf-drives-user($USER)" -s "Error ($RESULTM) en montar la unitat smb://$unitatCompartida text error: $MOUNTOUTPUT"                
