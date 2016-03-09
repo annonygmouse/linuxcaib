@@ -76,8 +76,9 @@ puntMontatge=$4
 group_id=$5
 
 if [ "$group_id" = "" ];then
-        logger -t "linuxcaib-conf-drives($USER)" -s "montaUnitatCompartida group_id no proporconat, emprant -domain users- com a fallback"
+        logger -t "linuxcaib-conf-drives($USER)" -s "montaUnitatCompartida group_id no proporcionat, emprant -domain users- com a fallback"
         group_id=$(id $usuariSeycon | sed -r 's/.*,(.*)\(domain users.*/\1/');
+        logger -t "linuxcaib-conf-drives($USER)" -s "group_id=$group_id"
 fi
 
 if [ "$LUSERCONF_PAM_MOUNT" = "SI" ];then
@@ -420,7 +421,7 @@ for y in $(seq 1 1 $NUM_DRIVES_USER) ; do
         # id|sed -r 's/.*,(.*)\(plugdev.*/\1/'
         #El mazinger fa aquesta comprovació abans de montar: if (isHostNear (host)) {
         GROUP_ID=$(id $USERNAME | sed -r 's/.*,(.*)\('"$GROUPCODE"'.*/\1/');
-        logger -t "linuxcaib-conf-drives($USER)" -s "group_id=$GROUP_ID "
+        logger -t "linuxcaib-conf-drives($USER)" -s "groupcode=$GROUPCODE group_id=$GROUP_ID "
         if  ( isHostNear "$UNITSERVER" ) ; then        
                 echo "# Montant unitat ("$UNIT_LETTER"_"$GROUPCODE")"                
                 #mkdir -p /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"

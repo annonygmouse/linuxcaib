@@ -10,6 +10,7 @@
 # 2- obtenir les unitats i montar-les via gvfs-mount 
 # gvfs-mount smb://SERVIDOR/[SHARE]
 # http://stackoverflow.com/questions/483460/how-to-mount-from-command-line-like-the-nautilus-does
+# TODO: enllaçar cap a la carpetes montades: /var/run/user/94891/gvfs/smb-share\:server\=lofihom3.caib.es\,share\=u83511/
 
 # Aquest script s'ha d'executar amb permissos d'usuari
 
@@ -57,10 +58,12 @@ if ( gvfs-mount  --list|grep -q "smb://"$unitatCompartida  );then
         #Esta montat, no hem de tornar a montar
         logger -t "linuxcaib-conf-drives-user($USER)" -s  "Unitat $unitatCompartida ja montada via gvfs."
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s  "Línia del gvfs-mount --list : $(gvfs-mount  --list|grep -q smb://$unitatCompartida)"
-        return 1
+        return 0;
+else
+	logger -t "linuxcaib-conf-drives-user($USER)" -s  "Unitat $unitatCompartida NO montada, la intentam montar."
 fi
 
-        { MOUNTOUTPUT=$(gvfs-mount -m smb://$unitatCompartida 2>&1 1>&3-) ;} 3>&1
+        { MOUNTOUTPUT=$(gvfs-mount smb://$unitatCompartida 2>&1 1>&3-) ;} 3>&1
 RESULTM=$?
 
 if [ $RESULTM -eq 0 ];then
@@ -68,7 +71,7 @@ if [ $RESULTM -eq 0 ];then
    logger -t "linuxcaib-conf-drives-user($USER)" -s  "Montada Unitat $unitatCompartida via gvfs"
    return 0
 else
-        logger -t "linuxcaib-conf-drives-user($USER)" -s "Error ($RESULTM) en montar la unitat //$unitatCompartida text error: $MOUNTOUTPUT"                
+        logger -t "linuxcaib-conf-drives-user($USER)" -s "Error ($RESULTM) en montar la unitat smb://$unitatCompartida text error: $MOUNTOUTPUT"                
         if [ "$DEBUG" -gt "0" ];then
                 logger -t "linuxcaib-conf-drives-user($USER)" -s "Parametres:"
                 logger -t "linuxcaib-conf-drives-user($USER)" -s "Usuari seycon $usuariSeycon"
@@ -180,7 +183,7 @@ if [ $RESULTM -eq 0 ];then
 
         if  ( isHostNear "$HOME_DRIVE_SERVER" ) ; then
 
-                RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD //$HOME_DRIVE_SERVER.caib.es/$USERNAME /home/$USU_LINUX/unitat_H $(id $USERNAME -u) )
+                RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD $HOME_DRIVE_SERVER.caib.es/$USERNAME /home/$USU_LINUX/unitat_H $(id $USERNAME -u) )
                 RESULT=$?
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "resultat montar: $RESULTM"
                 if [ ! $RESULT -eq 0 ];then
@@ -206,7 +209,7 @@ if [ $RESULTM -eq 0 ];then
         if  ( isHostNear "$PROFILE_DRIVE_SERVER" ) ; then
                 #mkdir -p /media/$USU_LINUX/.unitat_perfil
                 #chown $USER:$USER /media/$USU_LINUX/.unitat_perfil
-        RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD //$PROFILE_DRIVE_SERVER.caib.es/profiles/$USERNAME /media/$USU_LINUX/.unitat_perfil $(id $USERNAME -u))
+        RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD $PROFILE_DRIVE_SERVER.caib.es/profiles/$USERNAME /media/$USU_LINUX/.unitat_perfil $(id $USERNAME -u))
                 RESULT=$?
                 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives-user($USER)" -s "resultat montar perfil: $RESULTM"
                 if [ ! $RESULT -eq 0 ];then
@@ -291,7 +294,7 @@ for y in $(seq 1 1 $NUM_DRIVES_USER) ; do
         logger -t "linuxcaib-conf-drives-user($USER)" -s "group_id=$GROUP_ID "
         if  ( isHostNear "$UNITSERVER" ) ; then        
                 echo "# Montant unitat ("$UNIT_LETTER"_"$GROUPCODE")"                
-                RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD //$UNITSERVER/$GROUPCODE /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE" $GROUP_ID)
+                RESULTM=$(montaUnitatCompartidagvfs $USERNAME $PASSWORD $UNITSERVER/$GROUPCODE /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE" $GROUP_ID)
         else
                 logger -t "linuxcaib-conf-drives-user($USER)" -s "No he pogut montar la unitat compartida $GROUPCODE, el servidor ($UNITSERVER) no és accessible."
         fi
