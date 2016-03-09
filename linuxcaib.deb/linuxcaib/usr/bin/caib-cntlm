@@ -19,12 +19,12 @@ fi
 proxy1="$(host rproxy1.caib.es|awk '{ print $4 }'):3128"
 proxy2="$(host rproxy2.caib.es|awk '{ print $4 }'):3128"
 proxy3="$(host rproxy3.caib.es|awk '{ print $4 }'):3128"
+proxy4="$(host rproxy4.caib.es|awk '{ print $4 }'):3128"
 
 proxyActual=$(grep "^Proxy" /run/shm/$USER/"$USER"_cntlm.conf|awk '{ print $2}')
 
 case "$1" in
-        "proxy1"|"proxy2"|"proxy3")
-        echo "proxy3=$proxy3"
+        "proxy1"|"proxy2"|"proxy3"|"proxy4")
         #eval echo \${$"1"}
         proxyNou=$(eval echo \${$1})
         echo "$1 es $proxyNou"
@@ -66,8 +66,20 @@ case "$1" in
                 fi  
         fi
         ;;
+        "debug")
+
+	if [ "$cntlmRunning" == "true" ];then
+        	$0 stop
+	fi
+        echo "Alerta: se quedarà el procés en foreground, per aturar-lo s'ha de fer CTRL+C";
+        sleep 5
+        cntlm -v -U $USER -c /run/shm/$USER/"$USER"_cntlm.conf -P /run/shm/$USER/"$USER"_cntlm.pid
+        
+        #cntlmPid=$(cat /run/shm/$USER/"$USER"_cntlm.pid 2> /dev/null)
+        #echo "iniciat cntlm amb pid ($cntlmPid)"
+        ;;
         "start")
-	if [ "$cntlmRunning" == "false" ];
+	if [ "$cntlmRunning" == "false" ];then
         	cntlm -U $USER -c /run/shm/$USER/"$USER"_cntlm.conf -P /run/shm/$USER/"$USER"_cntlm.pid
 	fi 
         cntlmPid=$(cat /run/shm/$USER/"$USER"_cntlm.pid 2> /dev/null)
