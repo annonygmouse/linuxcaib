@@ -21,5 +21,6 @@ fi
 
 logger -t "linuxcaib-session-daemon" "Executant des de: $rutaScript params: $@"
 #TODO: executar com a daemon start-stop-daemon
-tclsh $rutaScript/caib-session-daemon.tcl $@ 
+tclsh $rutaScript/caib-session-daemon.tcl $@  &
+
 
