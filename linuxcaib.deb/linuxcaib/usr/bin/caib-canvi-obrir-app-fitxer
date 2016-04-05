@@ -1,5 +1,6 @@
 #!/bin/sh
 
+#TODO: permetre passar un tipus MIME amb opció "-m image/tiff" per exemple, de manera que no calgui un fitxer
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
@@ -36,6 +37,7 @@ if [ -z "$1" ];then
 	exit 1;
 fi
 
+extensioFitxer=$(echo "$1" | rev | cut -d. -f 1|rev)
 fileMimeType=$(xdg-mime query filetype $1)
   
 currentApp=$(xdg-mime query default $fileMimeType)
@@ -43,7 +45,7 @@ currentApp=$(xdg-mime query default $fileMimeType)
 echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació $currentApp"
 
 echo "Les aplicacions instal·lades que poden obrir fitxers de tipus $fileMimeType son:"
-for app in $(fgrep pdf /usr/share/applications/mimeinfo.cache|grep $fileMimeType|cut -d= -f2|sed 's/;/ /g')
+for app in $(fgrep $extensioFitxer /usr/share/applications/mimeinfo.cache|grep $fileMimeType|cut -d= -f2|sed 's/;/ /g')
 do
         printf "\t$app\n"
 done
