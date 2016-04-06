@@ -1,6 +1,6 @@
 #!/bin/sh
 
-#TODO: permetre passar un tipus MIME amb opció "-m image/tiff" per exemple, de manera que no calgui un fitxer
+#TODO: MIGRAR A ZENITY O NCURSES per no haver de fer copy&paste sinó poder triar via gui
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
@@ -9,40 +9,66 @@ if [ "$DEBUG" -ge 3 ]; then
     set -x
 fi
 
+
+# Initialize our own variables:
+output_file=""
+
+
 show_caib_canvi_obrir_app_fitxer_help () {
 cat << EOF
 Donat un fitxer, treu per terminal les aplicacions del sistema amb les 
 que se pot obrir el tipus de fitxer i permet canviar l'aplicació pre-determinada amb la que obrir-la.
 
-Ús: ${0##*/} [-h] fitxer
+Ús: ${0##*/} [-hv] [-m tipusMime] [-f fitxer]
 
       -h          mostra aquesta ajuda
+      -m          tipus mime a canviar
+      -v          verbose
 
 Exemples:
       ${0##*/} cert1.pdf  Mostra i permet triar tots els programes per veure fitxers PDF
+      ${0##*/} -m image/tiff Mostra i permet triar tots els programes que estan registrats per aquest tipus mime.
+                El format és: descripció/extensio fitxer
 EOF
 }
 
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-if [ "$1" = "-h" ];then
-	show_caib_canvi_obrir_app_fitxer_help
-	exit 1;
-fi
+# Initialize our own variables:
+output_file=""
+tipusMime="";
+fitxer="";
+extensioFitxer="";
+fileMimeType="";
+while getopts "hv?m:f:" opt; do
+    case "$opt" in
+    h|\?)
+        show_caib_canvi_obrir_app_fitxer_help
+        exit 0
+        ;;
+    v)  DEBUG=1
+        ;;
+    f)  fitxer="$OPTARG"
+        extensioFitxer=$(echo "$fitxer" | rev | cut -d. -f 1|rev)
+        fileMimeType=$(xdg-mime query filetype $fitxer)
+        ;;
+    m)  fileMimeType="$OPTARG"
+        extensioFitxer=$(echo $OPTARG |awk -F'=' '{print $1 }' |awk -F'/' '{print $2 }')
+        ;;
+    esac
+done
 
 
+shift $((OPTIND-1))
 
-if [ -z "$1" ];then
-        echo "Heu de passar un fitxer per paràmetre"
-	show_caib_canvi_obrir_app_fitxer_help
-	exit 1;
-fi
+[ "$1" = "--" ] && shift
 
-extensioFitxer=$(echo "$1" | rev | cut -d. -f 1|rev)
-fileMimeType=$(xdg-mime query filetype $1)
+
   
 currentApp=$(xdg-mime query default $fileMimeType)
 
-echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació $currentApp"
+echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació: $currentApp \n"
 
 echo "Les aplicacions instal·lades que poden obrir fitxers de tipus $fileMimeType son:"
 for app in $(fgrep $extensioFitxer /usr/share/applications/mimeinfo.cache|grep $fileMimeType|cut -d= -f2|sed 's/;/ /g')
