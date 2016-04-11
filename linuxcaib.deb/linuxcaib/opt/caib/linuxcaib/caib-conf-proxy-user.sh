@@ -27,6 +27,8 @@ HOSTNAME=$(hostname)
 #User agent que emprara el CNTLM de la distribució (imprescindible per a que l'autenticació pugui ser NTLM).
 CNTLM_USERAGENT="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/29.0" 
 
+DEBUG_CNTLM=0;
+
 #Importam les funcions auxiliars
 #Ruta base scripts
 BASEDIR=$(dirname $0)
@@ -190,7 +192,7 @@ if  [ "$(ps aux|grep cntlm|grep -v grep|awk '{ print $2 }')" != "" ];then
 fi
 
 #No cal nohup, el propi cntlm se posa en background
-if [ "$DEBUG" -gt "0" ];then
+if [ "$DEBUG_CNTLM" -gt "0" ];then
         logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s " Activat debug de cntlm"
         DEBUGCNTLM=" -v -T $NOMFITXCNTLMLOG "
 fi
@@ -220,6 +222,7 @@ El programa "${0##*/}" proxifica les aplicacions de GNU/Linux per a que emprin e
       -p PASSWORD contrasenya de l'usuari a emprar
       -c          agafa les credencials del fitxer "credentials". IMPORTANT, l'usuari ha de ser l'usuari de SEYCON.
       -v          mode verbose
+      -D          mode debug del cntlm (se queda en foreground!)
 
 Exemples:
         ${0##*/} -u u83511 -p password_u83511   Execució passant usuari i contrasenya
@@ -246,7 +249,7 @@ if [ "$DEBUG" -ge 3 ]; then
 fi
 
 
-while getopts "hcv?u:p:" opt; do
+while getopts "Dhcv?u:p:" opt; do
     case "$opt" in
     h|\?)
         show_proxy_conf_help
@@ -262,6 +265,8 @@ while getopts "hcv?u:p:" opt; do
                 PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         fi     
         ;;    
+    D)  DEBUG_CNTLM=1
+        ;;
     v)  DEBUG=1
         ;;
     u)  USERNAME="$OPTARG"
