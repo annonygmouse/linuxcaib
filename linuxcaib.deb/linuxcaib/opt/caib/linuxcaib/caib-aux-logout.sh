@@ -106,6 +106,13 @@ else
                 mazinger stop
         fi
         echo "70" ; sleep $SLEEP
+
+
+	echo "#Aturant screensaver-check-password";
+        PID_SCREENSAVER_CHECK_PASSWORD=$(ps aux|grep caib-screensaver-check-password| awk '{print $2}')
+        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-aux-logout($USER)" "DEBUG: feim el kill del caib-screensaver-check-password.sh de l'usuari (pid=$PID_SCREENSAVER_CHECK_PASSWORD=)"
+        kill $PID_SCREENSAVER_CHECK_PASSWORD
+
         #Elimin de memòria els fitxers amb credencials, clau de sessió seycon, identificador de sessió seycon etc.
         TMPMEM=$(/bin/df -t tmpfs |grep shm| awk 'BEGIN  { FS=" "} {print $6}')
         CARPETACREDENCIALSETC="$TMPMEM/""$USER/"
