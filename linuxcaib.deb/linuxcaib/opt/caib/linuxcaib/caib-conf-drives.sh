@@ -77,7 +77,7 @@ group_id=$5
 
 if [ "$group_id" = "" ];then
         logger -t "linuxcaib-conf-drives($USER)" -s "montaUnitatCompartida group_id no proporcionat, emprant -domain users- com a fallback"
-        group_id=$(id $usuariSeycon | sed -r 's/.*,(.*)\(domain users.*/\1/');
+        group_id=$(id $usuariSeycon | sed -r 's/.*=(.*)\('"domain\ users"'.*/\1/');
         logger -t "linuxcaib-conf-drives($USER)" -s "group_id=$group_id"
 fi
 
@@ -431,6 +431,18 @@ for y in $(seq 1 1 $NUM_DRIVES_USER) ; do
                 #mkdir -p /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
                 #chown $USER:$ID_GROUP /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"
                 RESULTM=$(montaUnitatCompartida $USERNAME $PASSWORD //$UNITSERVER/$GROUPCODE /media/$USU_LINUX/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE" $GROUP_ID)
+
+                RESULT=$?
+                [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "resultat montar unitat $UNIT_LETTER _ $GROUPCODE : $RESULTM"
+                if [ ! $RESULT -eq 0 ];then
+                        logger -t "linuxcaib-conf-drives($USER)" -s "Error montant unitat $UNIT_LETTER"_"$GROUPCODE"
+                        logger -t "linuxcaib-conf-drives($USER)" -s "RESULT=$RESULT"                
+                        logger -t "linuxcaib-conf-drives($USER)" -s "RESULTM=$RESULTM"
+                        echo "# Error montant unitat $UNIT_LETTER _ $GROUPCODE!!! "; sleep 10;
+                     
+                else
+                        [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s "Unitat $UNIT_LETTER _ $GROUPCODE  montada a : /media/$USU_LINUX unitatscompartides/$UNIT_LETTER _ $GROUPCODE"
+                fi                
                 PAM_MOUNT_OTHER_VOLUME="$PAM_MOUNT_OTHER_VOLUME 
 <volume options=\"uid=%(USER),gid=10000,dmask=0700\" user=\"*\" mountpoint=\"/home/%(USER)/unitatscompartides/"$UNIT_LETTER"_"$GROUPCODE"\" path=\"$GROUPCODE/\" server=\"$UNITSERVER\" fstype=\"cifs\" />"
         else
