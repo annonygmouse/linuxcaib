@@ -73,10 +73,9 @@ logger -t "linuxcaib-xsession-login($USER)" "Resultat /opt/caib/linuxcaib/ad-pol
 if [ "$result" = "changed" ];then
         logger -t "linuxcaib-xsession-login($USER)" "Canviada contrasenya, hem de tancar la sessió per a que l'usuari se torni a autenticar amb les credencials correctes"
         #REVISAR
-        zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Contrasenya canviada satisfactòriament, reiniciant la sessió" &
+        zenity --timeout 10 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Reiniciant la sessió.\n\nAquest dialeg se tancara en 10 segons" &
         gnome-session-quit --logout --no-prompt
         #Ha canviat contrasenya, hem de tornar a fer login!
-        echo "1" > /tmp/"$USER"_forceLogout
         exit 1
 else 
         if [ "$result" = "" ];then
