@@ -42,6 +42,7 @@ dbus-monitor --session  "type='signal',interface='org.gnome.ScreenSaver'" | \
                         logger -t "linuxcaib-screensaver-check-password($USER)" -s "ERROR canviant contrasenya: $result."
                 fi
         fi
+	sleep 1;
     fi
   done
 )
