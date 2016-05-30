@@ -76,8 +76,9 @@ puntMontatge=$4
 group_id=$5
 
 if [ "$group_id" = "" ];then
-        logger -t "linuxcaib-conf-drives($USER)" -s "montaUnitatCompartida group_id no proporcionat, emprant -domain users- com a fallback"
-        group_id=$(id $usuariSeycon | sed -r 's/.*=(.*)\('"domain\ users"'.*/\1/');
+        logger -t "linuxcaib-conf-drives($USER)" -s "ERROR: montaUnitatCompartida group_id no proporcionat, emprant -domain users- com a fallback"
+#        group_id=$(id $usuariSeycon | sed -r 's/.*=(.*)\('"domain\ users"'.*/\1/');
+        group_id=$(id u83511 -g);
         logger -t "linuxcaib-conf-drives($USER)" -s "group_id=$group_id"
 fi
 
@@ -88,7 +89,7 @@ fi
 
 
 #Primer comprovam si ja esta montat
-if ( df | grep "$(echo $puntMontatge | sed -e 's/\//\\\//g')">/dev/null );then
+if ( df | grep "$(echo $unitatCompartida | sed -e 's/\//\\\//g')">/dev/null );then
         #Esta montat, no hem de tornar a montar
         logger -t "linuxcaib-conf-drives($USER)" -s  "Unitat $unitatCompartida ja montada a $puntMontatge."
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-drives($USER)" -s  "Línia del fstab: $(df | grep "$(echo $puntMontatge | sed -e 's/\//\\\//g')")"
