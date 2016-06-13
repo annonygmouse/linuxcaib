@@ -425,7 +425,10 @@ for y in $(seq 1 1 $NUM_DRIVES_USER) ; do
         #       Agafar el ,143710(dgticadmdigital) identificador del grup amb nom groupcode mitjançant expressió regular.        
         # id|sed -r 's/.*,(.*)\(plugdev.*/\1/'
         #El mazinger fa aquesta comprovació abans de montar: if (isHostNear (host)) {
-        GROUP_ID=$(id $USERNAME | sed -r 's/.*,(.*)\('"$GROUPCODE"'.*/\1/');
+        GROUP_ID=""
+        if [ id u83511 | grep -q dgticfax ];then
+                GROUP_ID=$(id $USERNAME | sed -r 's/.*,(.*)\('"$GROUPCODE"'.*/\1/');
+        fi
         logger -t "linuxcaib-conf-drives($USER)" -s "groupcode=$GROUPCODE group_id=$GROUP_ID "
         if  ( isHostNear "$UNITSERVER" ) ; then        
                 echo "# Montant unitat ("$UNIT_LETTER"_"$GROUPCODE")"                

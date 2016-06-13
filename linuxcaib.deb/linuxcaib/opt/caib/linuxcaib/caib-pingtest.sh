@@ -5,6 +5,7 @@
 i=0
 while [ $i -lt 20 ]; do
         sleep 1
+        #Comprovam que podem fer ping al Gateway per defecte
         is_up=$(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo 1 || echo 0)
 #test is_up=0
         i=$(($i+1))

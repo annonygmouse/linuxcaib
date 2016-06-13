@@ -95,11 +95,11 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionUser=$seyconSessionUser"
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($USER)" -s "seyconSessionPassword de $(echo -n $seyconSessionPassword | wc -c ) caràcters "
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "seyconSessionUser=$USERNAME"
+[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "seyconSessionPassword de $(echo -n $PASSWORD | wc -c ) caràcters "
 
-if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
-then
+logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "test1"
+if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ];then
 #Si NO tenim usuari i password no podem configurar les impressores
     #echo "ERROR: Se necessita usuari i contrassenya per poder crear la sessió al seycon USERNAME=$USERNAME PASSWORD=$PASSWORD " >&2
     #echo "credentials=$(cat /home/$PAM_USER/credentials)"
@@ -107,10 +107,12 @@ then
     exit 1
 fi
 
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "id=$(id $USERNAME)"
-[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "gid=$(id $USERNAME -gn)"
+
+#[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "id=$(id $PAM_USER)"
+#[ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "gid=$(id $PAM_USER -gn)"
 USER_GID=$(id $USERNAME -gn)
 
+logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "test0"
 
 if [ "$DEBUG" -gt "0" ];then
         echo "DEBUG=$DEBUG, usuari='$USERNAME', resta parametres no emprats: $@"
@@ -125,6 +127,7 @@ fi
         chmod 600 $TMPMEM/$USERNAME/$NOMFITX
 
 
+logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "test1"
         #Cream la sessió de mazinger al seycon
         #https://sticlin2.caib.es:750/passwordLogin?action=createSession&user=u83511&port=55555&challengeId=AZWcjA0TRUupZzUlVKa4LhOQyvS0RLoMwffaqet59twePYnvbb&cardValue=
         NOMFITXSESKEY="$TMPMEM/""$USERNAME/""$USERNAME""_seycon_session_key"

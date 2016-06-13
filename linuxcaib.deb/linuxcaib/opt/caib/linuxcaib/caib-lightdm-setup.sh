@@ -44,6 +44,34 @@ logger -t "linuxcaib-lightdm-setup($USER)" "Ja tenim ping!"
 #logger -t "linuxcaib-lightdm-setup($USER)" "uid=$(id -u) Inici wbinfo -u"
 #nohup /usr/bin/wbinfo -u > /tmp/caib-lightdm-setup-wbinfo.out 2> /tmp/caib-lightdm-setup-wbinfo.err < /dev/null &
 
+(
+i=0
+while [ $i -lt 20 ]; do
+
+        sleep 1
+        #Comprovam que podem fer ping al Gateway per defecte
+        is_up=$(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo 1 || echo 0)
+#test is_up=0
+        i=$(($i+1))
+        testDC=$(wbinfo -D CAIB)
+        if ( echo $testDC  | grep  "Active Directory : Yes" -q );then
+                i=20
+        fi;
+        echo "$(($i*5))"
+done
+)|
+zenity --progress \
+  --title="Esperant DC" \
+  --text="Esperant accés a Controlador de Domini." \
+  --percentage=0 \
+   --auto-close
+
+testDC=$(wbinfo -D CAIB)
+if ( ! echo $testDC  | grep  "Active Directory : Yes" -q );then
+        zenity --modal --timeout=10 --error --title="Error de xarxa" --text="ERROR: no hi ha accés al Controlador de Domini del domini CAIB.\nNo podreu iniciar sessió a la Xarxa corporativa.\nTan sols podreu iniciar sessió amb un usuari local!"
+fi;
+
+
 okAvisLegal="1";
 
 if [ -f /etc/caib/linuxcaib/disableAvisLegal ];then
