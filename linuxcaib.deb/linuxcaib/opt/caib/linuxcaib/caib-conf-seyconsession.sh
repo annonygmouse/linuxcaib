@@ -13,10 +13,6 @@ unset http_proxy
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 if [ "$(readlink $0)" = "" ];then
         #no es un enllaç, agafam ruta normal
@@ -94,6 +90,11 @@ shift $((OPTIND-1))
 
 
 [ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "seyconSessionUser=$USERNAME"
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "seyconSessionPassword de $(echo -n $PASSWORD | wc -c ) caràcters "

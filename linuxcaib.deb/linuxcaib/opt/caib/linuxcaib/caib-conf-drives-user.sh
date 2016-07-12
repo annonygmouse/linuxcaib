@@ -22,10 +22,6 @@ USU_LINUX=$USER
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 PROGRESSBAR=20
 
@@ -134,7 +130,7 @@ while getopts "hmcv?l:u:p:" opt; do
                 PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         fi     
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     esac
 done
@@ -142,6 +138,11 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ];then

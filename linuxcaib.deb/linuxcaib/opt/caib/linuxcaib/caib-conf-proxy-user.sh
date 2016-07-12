@@ -243,10 +243,6 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 output_file=""
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 
 while getopts "Dhcv?u:p:" opt; do
@@ -267,7 +263,7 @@ while getopts "Dhcv?u:p:" opt; do
         ;;    
     D)  DEBUG_CNTLM=1
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     u)  USERNAME="$OPTARG"
         ;;
@@ -279,6 +275,11 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

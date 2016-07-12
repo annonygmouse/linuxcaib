@@ -26,10 +26,6 @@ UNAUTH_PROXYSERVER_PORT=3128
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 
 #Importam les funcions auxiliars
@@ -146,7 +142,7 @@ while getopts "hcv?u:p:l:" opt; do
         ;;    
     l)  LOCALUSERNAME="$OPTARG"
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     u)  USERNAME="$OPTARG"
         ;;
@@ -159,7 +155,13 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-server($USER)" -s "seyconSessionUser=$seyconSessionUser"
+
 
 if [ $USER = "root"  ]; then
         echo "localusername=$LOCALUSERNAME"

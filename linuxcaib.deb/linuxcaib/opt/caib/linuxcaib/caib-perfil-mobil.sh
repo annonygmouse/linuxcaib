@@ -50,10 +50,6 @@ fi
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 echo "# Sincronitzant perfil mobil..."
 if [ $USER = "root"  ]; then
@@ -155,7 +151,7 @@ while getopts "hiocv?u:p:" opt; do
     o)  origen=$HOME
         desti=$perfilmontat
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     u)  USERNAME="$OPTARG"
         ;;
@@ -167,6 +163,11 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 

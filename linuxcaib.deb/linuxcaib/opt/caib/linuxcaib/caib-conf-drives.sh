@@ -198,7 +198,7 @@ while getopts "hmcv?l:u:p:" opt; do
     l)  LOCALUSERNAME="$OPTARG"
         USU_LINUX=$LOCALUSERNAME
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     m)  LUSERCONF_PAM_MOUNT="SI"
         ;;

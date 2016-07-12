@@ -15,10 +15,6 @@ fi
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 # Initialize our own variables:
 output_file=""
@@ -86,6 +82,11 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-grups($USER)" -s "seyconSessionUser=$seyconSessionUser"
 

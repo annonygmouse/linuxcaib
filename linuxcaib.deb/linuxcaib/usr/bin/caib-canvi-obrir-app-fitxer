@@ -4,10 +4,6 @@
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 
 # Initialize our own variables:
@@ -23,6 +19,7 @@ que se pot obrir el tipus de fitxer i permet canviar l'aplicació pre-determinad
 
       -h          mostra aquesta ajuda
       -m          tipus mime a canviar
+      -f          fitxer del tipus que es vol canviar l'aplicació
       -v          verbose
 
 Exemples:
@@ -31,6 +28,7 @@ Exemples:
                 El format és: descripció/extensio fitxer
 EOF
 }
+
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -41,13 +39,13 @@ tipusMime="";
 fitxer="";
 extensioFitxer="";
 fileMimeType="";
-while getopts "hv?m:f:" opt; do
+while getopts ":hv?m:f:" opt; do
     case "$opt" in
     h|\?)
         show_caib_canvi_obrir_app_fitxer_help
         exit 0
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     f)  fitxer="$OPTARG"
         extensioFitxer=$(echo "$fitxer" | rev | cut -d. -f 1|rev)
@@ -64,11 +62,23 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
+if [ -z $fileMimeType ];then
+	show_caib_canvi_obrir_app_fitxer_help
+	exit 1;
+fi
   
 currentApp=$(xdg-mime query default $fileMimeType)
 
-echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació: $currentApp \n"
+if [ "$currentApp" = "" ];then
+	echo "No hi ha cap aplicació pre-determinada per obrir els fitxers de tipus $fileMimeType"
+else
+	echo "Actualment els fitxers de tipus $fileMimeType s'obren per defecte amb l'aplicació: -$currentApp- \n"
+fi
 
 echo "Les aplicacions instal·lades que poden obrir fitxers de tipus $fileMimeType son:"
 for app in $(fgrep $extensioFitxer /usr/share/applications/mimeinfo.cache|grep $fileMimeType|cut -d= -f2|sed 's/;/ /g')

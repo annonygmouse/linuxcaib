@@ -80,7 +80,7 @@ while getopts "hfcv?u:p:" opt; do
         ;;
     f)  FORCE_CHANGE_SHIRO_PASS="s"
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     u)  USERNAME="$OPTARG"
         ;;
@@ -94,6 +94,12 @@ shift $((OPTIND-1))
 [ "$1" = "--" ] && shift
 
 [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-shirokabuto($USER)" -s "seyconSessionUser=$seyconSessionUser"
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
+
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

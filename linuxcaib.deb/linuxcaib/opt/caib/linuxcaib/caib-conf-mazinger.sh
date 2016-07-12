@@ -19,10 +19,7 @@ fi
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
+
 
 show_caib_conf_mazinger_help () {
 cat << EOF
@@ -73,6 +70,10 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
+fi
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then

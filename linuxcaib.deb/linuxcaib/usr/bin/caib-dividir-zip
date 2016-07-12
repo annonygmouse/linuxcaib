@@ -37,7 +37,7 @@ while getopts "hv?f:m:" opt; do
         show_caib_dividir_zip_help
         exit 0
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     f)  fitxer="$OPTARG"
         ;;

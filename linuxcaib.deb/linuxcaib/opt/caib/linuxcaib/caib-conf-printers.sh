@@ -33,21 +33,12 @@
 
 #Exemple de resultat avahi
 #=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;Internet Printer;local;ipreinf8.local;10.215.3.253;631;"adminurl=http://ipreinf8.local." "priority=60" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "rp=ipreinf8" "pdl=application/postscript,application/vnd.hp-PCL,application/vnd.hp-PCLXL" "qtotal=1" "txtvers=1"
-
 #=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;PDL Printer;local;ipreinf8.local;10.215.3.253;9100;"adminurl=http://ipreinf8.local." "priority=40" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "pdl=application/postscript,application/vnd.hp-PCL,application/vnd.hp-PCLXL" "qtotal=1" "txtvers=1"
-
 #=;eth0;IPv4;HP\032Color\032LaserJet\032CP3505\032\09117BD33\093;UNIX Printer;local;ipreinf8.local;10.215.3.253;515;"Binary=T" "Transparent=T" "adminurl=http://ipreinf8.local." "priority=30" "product=(HP Color LaserJet CP3505)" "ty=HP Color LaserJet CP3505" "pdl=application/postscript" "rp=BINPS" "qtotal=4" "txtvers=1"
-
-
-
 
 
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
-fi
 
 
 
@@ -123,7 +114,7 @@ while getopts "hcv?u:p:" opt; do
                 PASSWORD=$(grep -i "^password=" $HOME/credentials | tr -d '\r'| tr -d '\n'| cut -f 2 -d "=" --output-delimiter=" ")
         fi        
         ;;
-    v)  DEBUG=1
+    v)  DEBUG=$(($DEBUG + 1))
         ;;
     u)  USERNAME="$OPTARG"
         ;;
@@ -135,6 +126,7 @@ done
 shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
+
 
 if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ] 
 then
