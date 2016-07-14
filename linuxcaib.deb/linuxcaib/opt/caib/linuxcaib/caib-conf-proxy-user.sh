@@ -331,6 +331,7 @@ then
         gsettings set org.gnome.system.proxy.ftp host '$USERNAME:$PASSWORD@$PROXYSERVER_IP'
         gsettings set org.gnome.system.proxy.ftp port $PROXYSERVER_PORT
 	#TODO: adecuar el contingut de les variables $hostnamesDirectes,$networksDirectes,$dominisDirectes al format que espera gsettings
+        #per exemple emprant: http://serverfault.com/questions/762082/convert-no-proxy-to-gsettings-ignore-hosts
 	#Aquesta clau conté una llista d'ordinadors als quals es connectarà directament en lloc d'utilitzar el servidor intermediari (en cas que s'hagi activat). Els valors poden ser noms d'ordinadors, dominis (amb comodins com ara *.exemple.cat), adreces IP d'ordinadors (tant IPv4 com IPv6) i adreces de xarxa amb màscara de xarxa (com per exemple 192.168.0.0/24).
 	gsettings set org.gnome.system.proxy ignore-hosts "['localhost', '127.0.0.0/8', '10.0.0.0/8', '192.168.0.0/16', '172.16.0.0/12' , '*.localdomain.com', '*.caib.es' ]"
 
@@ -369,7 +370,6 @@ fi
 
 javaProxyOn () {
 #les propietats estan dins $HOME/.java/deployment/deployment.properties
-#TODO: NO SE SI java accepta file:/// .....  !!!!comprovar!!!!!
 
 if [ -f .java/deployment/deployment.properties ]; then
 

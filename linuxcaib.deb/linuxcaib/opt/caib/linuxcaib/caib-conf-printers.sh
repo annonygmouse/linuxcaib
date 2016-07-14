@@ -17,16 +17,15 @@
 # Pre-requisits: cups, cups-utils, cups-pdf, hplip, cups-driver-gutenprint, libgutenprint2, printer-driver-postscript-hp, hpijs-ppds, printer-driver-all, wget, xmlstarlet
 
 #Nota2: Ubuntu 14.04 detecta i configura automàticament totes les impressores de xarxa que troba. Cosa que fa aquest script
-#gairebé obsolet. Tan sols és imprescindible per les impressores compartides des de PCs d'usuari ( impressores del tipus epreinf149p ).
+#gairebé obsolet. Tan sols és imprescindible per les impressores compartides des de PCs d'usuari ( impressores del tipus epreinf149p ). I aquesta funcionalitat encara NO està provada.
 
 #Variables de configuració:
 # DEL_PREVIOUS_PRINTERS (NO) Defineix si hem d'eliminar les impressores configurades anteriorment. Per defecte NO, ja que encara
 # que hi hagi impressores donades d'alta anteriorment, si l'usuari no la té, no hi podrà imprimir per manca de permissos.
 
 
+# Les impressores de tipus USB no les gestiona aquest script a ubuntu 14.04 en teoria no fa falta, les hauria de detectar automàticament.
 #TODO: 
-# gestionar impressores USB de tipus HP? hp-probe --bus usb.... a ubuntu 14.04 en teoria no fa falta, les hauria de detectar 
-#automàticament.
 # Cal provar compartir una impressora via SMB.
 # detectar si les impressores de xarxa de l'usuari son de HP (hp-makeuri 10.215.3.253)
 # i així emprar sempre el driver de HP ja que son els millors suportats.
@@ -254,8 +253,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                 servImpresioLinux=$(esServImprLinux $PRINTSERVER)
                 #$(echo $PRINTSERVER | grep -q simprlin && echo linux)
                 if [ "$servImpresioLinux" = "SI" ];then
-                        logger -t "linuxcaib-conf-printers($USER)" "Impressora: $PRINTERNAME està al servidor d'impressió $PRINTSERVER Linux (simprlinXXX)"
-                        #TODO: configurar aquesta coa d'impresssió
+                        logger -t "linuxcaib-conf-printers($USER)" "Impressora: $PRINTERNAME està al servidor d'impressió $PRINTSERVER Linux (simprlinXXX) (TODO, configurarla)"
                 else
                         logger -t "linuxcaib-conf-printers($USER)" "Impressora: $PRINTERNAME està al servidor d'impressió $PRINTSERVER windows (o màquina client windows)"
 
@@ -275,7 +273,7 @@ for y in $(seq 1 1 $NUM_PRINTERS) ; do
                                 #echo "printerIP=$PRINTERIP"
                                 logger -t "linuxcaib-conf-printers($USER)" "Impressora $PRINTERNAME te IP: $PRINTERIP."; 
 
-                                #TODO: mentre no se defineixi infraestructura per donar suport a linux (per exemple
+                                #ALERTA: mentre no se defineixi infraestructura per donar suport a linux (per exemple
                                 #definint PPDs corporatius penjats a algun servidor per cada impressora/nom d'impressora,
                                 #El que se fa és emprar el driver recomanat si aconseguim detectar la impressora via dns-ds (avahi).
                                 # Si no podem detectar la marca i model (i el seu driver), emprarem un driver genèric.

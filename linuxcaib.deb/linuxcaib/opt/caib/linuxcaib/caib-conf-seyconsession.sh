@@ -166,9 +166,9 @@ logger -t "linuxcaib-conf-seyconsession($PAM_SERVICE-$PAM_USER)" -s "test1"
                 else
                         #Nota el es.caib.sso.TooManySessionsException no el dona mai si l'usuari te multisessió.
                         if [ $( echo $USER_SESSION | cut -f 1 -d "|" ) = "es.caib.sso.TooManySessionsException" ];then 
-                                logger -t "linuxcaib-conf-seyconsession($USERNAME)" "ERROR: l'usuari te massa sessions obertes! ($USER_SESSION) (display=$DISPLAY)"
                                 #Si la màquina on ja hi ha una sessió oberta es la pròpia
                                 hostAmbSessio=$( echo $USER_SESSION | cut -f 2 -d "|" )
+                                logger -t "linuxcaib-conf-seyconsession($USERNAME)" "ERROR: l'usuari te massa sessions obertes! ($USER_SESSION) (display=$DISPLAY), te sessio dins la màquina: $hostAmbSessio (hostname=$(hostname))"
                                 if [ "$hostAmbSessio" = "$(hostname)" ];then
                                         #WARN: hauriem de tornar a provar de fer login en X segons, per si s'ha reiniciat rapid i encara hi ha sessió anterior. Per ara deixam que surti el missatge i que l'usuari ho torni a intentar ell manualment
                                          if [ "$DISPLAY" != ":0.0" -a  "$DISPLAY" != ":0" ];then

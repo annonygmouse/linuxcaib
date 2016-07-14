@@ -86,7 +86,7 @@ case "$PAM_SERVICE" in
                 logger -t "linuxcaib-pam-ses_close($PAM_SERVICE-$PAM_USER)"  "L'usuari $USER no estava loguejat al SEYCON o ja ha fet logout"
         else 
                 logger -t "linuxcaib-pam-ses_close($PAM_SERVICE-$PAM_USER)" -s "L'usuari $USER encara esta loguejat al SEYCON, hem de fer logout"
-                logger -t "linuxcaib-pam-ses_close($PAM_SERVICE-$PAM_USER)" -s "user=$PAM_USER TODO: si no s'ha fet logout de lightdm(per exemple perque s'ha donat a apagar en comptes de sortir sessio), fer logout aqui USER_LIGHTDM_LOGOUT_EXECUTAT=$USER_LIGHTDM_LOGOUT_EXECUTAT"
+                logger -t "linuxcaib-pam-ses_close($PAM_SERVICE-$PAM_USER)" -s "user=$PAM_USER ALERTA: si no s'ha fet logout de lightdm(per exemple perque s'ha donat a apagar en comptes de sortir sessio), fer logout aqui USER_LIGHTDM_LOGOUT_EXECUTAT=$USER_LIGHTDM_LOGOUT_EXECUTAT"
                 aturar_seycon_session_daemon
         fi
         #logger -t "linuxcaib-pam-ses_close($PAM_SERVICE)" -s "Fi tancar sessió X-Window"

@@ -1,7 +1,6 @@
 #!/bin/sh
 
 #Per si el LANG no estigues ben posat, en emprar accents al zenity, fallaria.
-#TODO: mirar d'emprar C.UTF-8 !!!!
 if [ -z $LANG ]; then 
         export LANG=C.UTF-8
 fi
@@ -173,12 +172,12 @@ seycon_login () {
         "EXPIRED")     #En teoria aquí no hauria d'entrar mai, ja que qui realment valida la contrasenya és l'AD.
 		       #ERROR / BUG si la contrasenya expira avui (encara que expiri a una hora més tard, el seycon ens diu que la contrasenya ha expirat!
 		       #Dins del PAM ho hem d'ignorar!
+                       logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ALERTA: si la contrasenya caduca avui no podem fer login via seycon (si via AD) pero no puc canviar la contrasenya aqui, cal fer-ho dins xsession!"
 		       if [ "$DISPLAY" != ":0.0" -a  "$DISPLAY" != ":0" ];then
 				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s  "ERROR: La contrasenya expira avui, per canviar-la heu de executar \"caib-chpasswd\". Un cop canviada la contrasenya, heu de reiniciar la sessió"
 				exit;
 		       else 
-				zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="La contrasenya caduca AVUI, l'haureu de canviar i reiniciar la sessió" &
-				logger -t "linuxcaib-pam-auth($PAM_SERVICE-$PAM_USER)" -s "ERROR/TODO: si la contrasenya caduca avui no podem fer login via seycon (si via AD) pero no puc canviar la contrasenya aqui, cal fer-ho dins xsession!"
+				zenity --timeout 20 --width=400 --notification --title="Accés a la xarxa corporativa" --text="La contrasenya caduca AVUI, l'haureu de canviar executant \"caib-chpasswd\" i reiniciar la sessió" &
 				exit;
 			fi
                 ;;
