@@ -47,11 +47,8 @@ logger -t "linuxcaib-lightdm-setup($USER)" "Ja tenim ping!"
 (
 i=0
 while [ $i -lt 20 ]; do
-
         sleep 1
-        #Comprovam que podem fer ping al Gateway per defecte
-        is_up=$(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo 1 || echo 0)
-#test is_up=0
+        #Comprovam que tenim accés al controlador de domini de la CAIB
         i=$(($i+1))
         testDC=$(wbinfo -D CAIB)
         if ( echo $testDC  | grep  "Active Directory : Yes" -q );then
@@ -59,8 +56,7 @@ while [ $i -lt 20 ]; do
         fi;
         echo "$(($i*5))"
 done
-)|
-zenity --progress \
+) | zenity --progress \
   --title="Esperant DC" \
   --text="Esperant accés a Controlador de Domini." \
   --percentage=0 \
@@ -69,6 +65,33 @@ zenity --progress \
 testDC=$(wbinfo -D CAIB)
 if ( ! echo $testDC  | grep  "Active Directory : Yes" -q );then
         zenity --modal --timeout=10 --error --title="Error de xarxa" --text="ERROR: no hi ha accés al Controlador de Domini del domini CAIB.\nNo podreu iniciar sessió a la Xarxa corporativa.\nTan sols podreu iniciar sessió amb un usuari local!"
+        exit 0;
+fi;
+
+(
+i=0
+while [ $i -lt 20 ]; do
+        sleep 1
+        #Comprovam que tenim accés al controlador de domini de la CAIB
+  
+        i=$(($i+1))
+        testDC2=$(wbinfo --name-to-sid="domain users")
+        if ( echo $testDC2  | grep  "SID_DOM_GROUP" -q );then
+                i=20
+        fi;
+        echo "$(($i*5))"
+done
+) | zenity --progress \
+  --title="Comprovant DC" \
+  --text="Comprovant accés a Controlador de Domini." \
+  --percentage=0 \
+   --auto-close
+
+
+testDC2=$(wbinfo --name-to-sid="domain users")
+if ( echo $testDC2  | grep  "SID_DOM_GROUP" -q );then
+        zenity --modal --timeout=10 --error --title="Error de xarxa" --text="ERROR: no hi ha accés al Controlador de Domini del domini CAIB.\nNo podreu iniciar sessió a la Xarxa corporativa.\nTan sols podreu iniciar sessió amb un usuari local!"
+        exit 0;
 fi;
 
 

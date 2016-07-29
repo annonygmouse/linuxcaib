@@ -1,0 +1,9 @@
+Package: libssl1.0.0
+Pin: version 1.0.1f-1ubuntu2.18
+Pin-Priority: 1001
+
+
+Package: openssl
+Pin: version 1.0.1f-1ubuntu2.18
+Pin-Priority: 1001
+

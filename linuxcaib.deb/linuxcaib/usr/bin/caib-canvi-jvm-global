@@ -1,34 +1,68 @@
-#!/bin/sh
+#!/bin/bash
 
 #Script per canviar a nivell global la JVM emprada
 #Només mostra les JVM d'oracle
 #Cal que l'usuari tengui permisos de sudo per poder canviar la JVM!
 
+#TODO: comprovar que si no hi ha a zenity instal·lat, segueixi funcionant.
+
 #Si debug no està definida, la definim
 if [ -z $DEBUG ]; then DEBUG=0; fi
-if [ "$DEBUG" -ge 3 ]; then
-    # trace output
-    set -x
+
+
+JVM_TYPE=" --jre "
+
+ZENITYUNAVAILABLE=false
+if [ "$(zenity --width=0 --height=0 --timeout=1 --info --text "comprovant zenity..." 2>&1 | grep -v warning)" != "" ];then
+        ZENITYUNAVAILABLE=true
 fi
+
 
 show_caib_canvi_jvm_global_help () {
 cat << EOF
 Canvia la màquina virtual java per defecte
 
 Ús: ${0##*/} [-ha]
-
       -h          mostra aquesta ajuda
       -a          tria entre totes les JVM (no només les d'oracle)
-
+      -d          tria entre tots els tipus de JVM (no només jre)
+      -v          verbose
 EOF
 }
 
+# A POSIX variable
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
 
-if [ "$1" = "-h" ];then
-	show_caib_canvi_jvm_global_help
-	exit 1;
+# Initialize our own variables:
+output_file=""
+tipusMime="";
+fitxer="";
+extensioFitxer="";
+fileMimeType="";
+while getopts "hvda?" opt; do
+    case "$opt" in
+    h|\?)
+        show_caib_canvi_jvm_global_help
+        exit 0
+        ;;
+    v)  DEBUG=3
+        ;;
+    d)  JVM_TYPE=""
+        ;;
+    a)  ALL_JVMS="SI"
+        ;;
+    esac
+done
+
+
+shift $((OPTIND-1))
+
+[ "$1" = "--" ] && shift
+
+if [ "$DEBUG" -ge 3 ]; then
+    # trace output
+    set -x
 fi
-
 
 #Primer mostram les JVM disponibles:
 
@@ -37,17 +71,33 @@ if [ ! $(id -u) -eq 0 ];then
         SUDO="sudo "
 fi
 
+JVM_ACTUAl=$(readlink -f /usr/bin/java|awk -F / '{ print $5 }')
+echo "JVM actual: $JVM_ACTUAl"
 
-echo "Llista de JVMs disponibles"
-if [ "$1" = "-a" ];then
-        $SUDO update-java-alternatives -l | cut -d" " -f 1,3
-else 
-        echo "excepte les openjdk"
-        $SUDO update-java-alternatives -l | grep -v "openjdk"|cut -d" " -f 1,3
+
+DESC_LLISTA_JAVA=$(echo -n "Llista de JVMs disponibles ")
+if [ "$1" != "-a" ];then
+        DESC_LLISTA_JAVA=$DESC_LLISTA_JAVA"(excepte les openjdk)"
+        #update-java-alternatives -l | grep -v "openjdk"|cut -d" " -f 1,3
 fi
 
-echo "Fes copy/paste del nom de la JVM que vols emprar i prem 'intro'"
-read JVMTRIADA
+
+JVMTRIADA="";
+if [ "$ZENITYUNAVAILABLE" = false ];then
+        LLISTA_JAVAS=$(update-java-alternatives $JVM_TYPE -l | awk -v jvm_actual="$JVM_ACTUAL" '{ if ( $1 == jvm_actual)
+    print "TRUE " $1 
+else
+    print "FALSE " $1 }'|tr '\n' ' ')
+       JVMTRIADA=$(zenity --height=$(( $(update-java-alternatives -l |wc -l) * 45 )) --title=$0 --text="$DESC_LLISTA_JAVA" --list --radiolist --column="Sel·leccionar" --column="JVM" $LLISTA_JAVAS )
+else
+        LLISTA_JAVAS=$(update-java-alternatives $JVM_TYPE -l | awk -v jvm_actual="$JVM_ACTUAL" '{ if ( $1 == jvm_actual)
+    print "TRUE " $1 
+else
+    print "FALSE " $1 }')
+        echo "Fes copy/paste del nom de la JVM que vols emprar i prem 'intro'"
+        read JVMTRIADA
+fi
+
 
 if [ ! -d /usr/lib/jvm/$JVMTRIADA ];then
         echo "ERROR: màquina virtual java no trobada, segur que heu fet be el copy&paste?"
@@ -95,10 +145,10 @@ if [ "$minIndexVersioJRE" = "-1" ];then
         exit 0;
 fi
 
-echo "Index versio java configurada: $minIndexVersioJRE"
+#echo "Index versio java configurada: $minIndexVersioJRE"
 #3. eliminam les versions amb index menor (versions superiors)
-minIndexVersioJRE=`echo $minIndexVersioJRE - 1 | bc`
 echo "Eliminam les versions amb index menor (versions superiors) que $minIndexVersioJRE"
+minIndexVersioJRE=`echo $minIndexVersioJRE - 1 | bc`
 while [ "$minIndexVersioJRE" -ge "0" ];do
         jvmVersion=$(grep "deployment.javaws.jre.$minIndexVersioJRE.product" $HOME/.java/deployment/deployment.properties|cut -d= -f2)
         echo "eliminant la configuració de la JVM $jvmVersion ($minIndexVersioJRE)"

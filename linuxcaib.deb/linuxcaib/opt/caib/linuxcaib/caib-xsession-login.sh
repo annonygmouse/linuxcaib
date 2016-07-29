@@ -56,6 +56,7 @@ if [ -r $HOME/.profile_caib_proxy ];then
         . $HOME/.profile_caib_proxy
 fi
 rm /tmp/"$USER"_forceLogout
+rm /tmp/"$USER"_passwordChanged
 (
 echo "# Accés a la xarxa corporativa";
 sleep $LONGSLEEP;
@@ -73,9 +74,11 @@ logger -t "linuxcaib-xsession-login($USER)" "Resultat /opt/caib/linuxcaib/ad-pol
 if [ "$result" = "changed" ];then
         logger -t "linuxcaib-xsession-login($USER)" "Canviada contrasenya, hem de tancar la sessió per a que l'usuari se torni a autenticar amb les credencials correctes"
         #REVISAR
-        zenity --timeout 10 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Reiniciant la sessió.\n\nAquest dialeg se tancara en 10 segons" &
-        gnome-session-quit --logout --no-prompt
+        zenity --timeout 10 --width=400 --notification --title="Accés a la xarxa corporativa" --text="Reiniciant la sessió. Aquest dialeg se tancara en 10 segons" &
+        #gnome-session-quit --logout --no-prompt
         #Ha canviat contrasenya, hem de tornar a fer login!
+        echo "1" > /tmp/"$USER"_passwordChanged
+        dash caib-xsession-logout.sh
         exit 1
 else 
         if [ "$result" = "" ];then
@@ -179,6 +182,15 @@ if [ -r /tmp/"$USER"_forceLogout ];then
 else
         logger -t "linuxcaib-xsession-login($USER)"  "ForceLogout=$forceLogout"
 fi
+
+if [ -r /tmp/"$USER"_passwordChanged ];then
+        /usr/bin/zenity  --error --title="Accés a la xarxa corporativa" --text="S'ha produit un error que impedeix iniciar sessió.\n\n Telefonau al vostre CAU."
+        logger -t "linuxcaib-xsession-login($USER)"  "ForceLogout"
+        exit 1;
+else
+        logger -t "linuxcaib-xsession-login($USER)"  "ForceLogout=$forceLogout"
+fi
+
 
 #Forçam la càrrega del .profile_caib_proxy per definir les variables d'entorn PROXY fora del bucle de zenity per a que inicialment la sessió X tengui les variables d'entorn del proxy.
 #Posteriorment el bash llegirà .profile
