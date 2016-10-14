@@ -18,7 +18,7 @@
 #fi
 
 #Si debug no està definida, la definim
-if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ -z $DEBUG ]; then DEBUG=1; fi
 if [ "$DEBUG" -ge 3 ]; then
     # trace output
     set -x
@@ -51,18 +51,37 @@ logger -t "linuxcaib-monitor-shutdown($USER)" -s "Inici tasca escoltar dbus per 
 #23:13:35 O:       )
 #23:13:35 O:    ]
 
+#echo "fsdjflñsdjk\nflkñakdsjfñl skdf\nsdflkñjsd\nboolean\nfsdfkldsj" > x.txt
+#cat x.txt
+#if cat x.txt | grep "boolean true" &> /dev/null; then
+#	echo "tancant seyconsession"
+#fi  
+
+#TODO: inhibit http://unix.stackexchange.com/questions/64151/networkmanager-disabled-network-when-sending-system-to-sleep#102658
+
 dbus-monitor --system  "type='signal',interface='org.freedesktop.login1.Manager'" | \
 (
   while true; do
     read X
+    stamp=$(/bin/date +'%Y%m%d%H%M%S %a')
+    [ "$DEBUG" -gt "0" ] && echo "--- rebut: " >> $HOME/tancant.log
     [ "$DEBUG" -gt "0" ] && echo $X >> $HOME/tancant.log
-    echo $X >> $HOME/tancant.log
-    if echo $X | grep "boolean true" &> /dev/null; then
-	echo "tancant seyconsession" >> $HOME/tancant.log
-	logger -t "linuxcaib-monitor-shutdown($USER)" -s "Màquina tancant, feim logout de seycon"
-	/opt/caib/linuxcaib/caib-aux-logout.sh
+    [ "$DEBUG" -gt "0" ] && echo "--- ara ho processarem " >> $HOME/tancant.log
+#    echo $X >> $HOME/tancant.log
+    if echo $X | grep "PrepareForShutdown";then
+            read X
+            [ "$DEBUG" -gt "0" ] && echo "PrepareForShutdown detected " >> $HOME/tancant.log
+            if echo $X | grep "boolean true" &> /dev/null; then
+                stamp=$(/bin/date +'%Y%m%d%H%M%S %a')
+                [ "$DEBUG" -gt "0" ] && echo "True detected " >> $HOME/tancant.log
+	        echo "tancant seyconsession" >> $HOME/tancant-$stamp.log
+	        logger -t "linuxcaib-monitor-shutdown($USER)" -s "Màquina tancant, feim logout de seycon"
+	        /opt/caib/linuxcaib/caib-aux-logout.sh
+            fi
     fi  
    done
 )
+
+logger -t "linuxcaib-monitor-shutdown($USER)" -s "Fi tasca escoltar dbus per detectar apagat estació de treball"
 
 
