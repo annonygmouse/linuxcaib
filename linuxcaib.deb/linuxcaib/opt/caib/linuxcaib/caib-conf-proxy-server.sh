@@ -71,16 +71,17 @@ if [ "$CNTLMVERSION" = "" ];then
             cp /media/P_$PSHARE/caib/dissoflinux/027970/cntlm_0.92.3-caib_"$ARCH".deb /tmp/cntlm_0.92.3-caib_$ARCH.deb
     else 
             #Sinó s'ho descarrega del gforge
-            wget -q http://gforge.caib.es/docman/view.php/160/$ruta/cntlm_0.92.3-caib_i386.deb -O /tmp/cntlm_0.92.3-caib_$ARCH.deb
+            wget -q http://gforge.caib.es/docman/view.php/160/$ruta/cntlm_0.92.3-caib_$ARCH.deb -O /tmp/cntlm_0.92.3-caib_$ARCH.deb
     fi
 
     if [ -f  /tmp/cntlm_0.92.3-caib_"$ARCH".deb ]; then
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "Copiat cntlm dins /tmp/cntlm_0.92.3-caib_"$ARCH".deb"
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "Instal·lant cntlm_0.92.3-caib_$ARCH.deb"
-        dpkg -i /tmp/cntlm_0.92.3-caib_i386.deb
+        dpkg -i /tmp/cntlm_0.92.3-caib_$ARCH.deb
         [ "$DEBUG" -gt "0" ] && logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "cntlm caib instal·lat, deshabilitam el servei de cntlm (s'iniciarà manualment)"
         update-rc.d cntlm disable
-        posarPaquetHold "cntlm"     
+        posarPaquetHold "cntlm"
+        service cntlm stop     
         exit 1;
     else
         logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "ERROR: No he pogut obtenir el cntlm ni de la unitat P ni de http://gforge.caib.es/docman/view.php/160/140/cntlm_0.92.3-caib_"$ARCH".deb dins /tmp/cntlm_0.92.3-caib_"$ARCH".deb"
