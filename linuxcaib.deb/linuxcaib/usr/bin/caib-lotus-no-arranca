@@ -14,6 +14,14 @@ fi
 
 cd /tmp
 
-rm Notes_socket_* 
-rm lnotesMutex_*
+fitxers=$(ls Notes_socket_*)
+#echo "notessocket=$fitxers"
+if [ "$fitxers" != "" ];then
+        echo "eliminats /tmp/Notes_socket_*"
+fi
 
+fitxers=$(ls lnotesMutex_*)
+#echo "notessocket=$fitxers"
+if [ "$fitxers" != "" ];then
+        echo "eliminats /tmp/lnotesMutex_*"
+fi 

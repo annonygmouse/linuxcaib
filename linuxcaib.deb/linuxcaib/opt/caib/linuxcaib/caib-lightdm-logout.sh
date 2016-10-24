@@ -8,20 +8,32 @@
 # A Ubuntu 14.04 sí que està definida
 
 #Si debug no està definida, la definim
-if [ -z $DEBUG ]; then DEBUG=0; fi
+if [ -z $DEBUG ]; then DEBUG=1; fi
 if [ "$DEBUG" -ge 3 ]; then
     # trace output
     set -x
 fi
 
-USER_GID=$(id $USER -gn)
-if [ -f /home/$USER/shutdown-lightdm.txt ];then
-        rm /home/$USER/shutdown-lightdm.txt
-        touch /home/$USER/shutdown-lightdm.txt
-        chown $USER:"$USER_GID" /home/$USER/shutdown-lightdm.txt
+
+logger -t "linuxcaib-lightdm-logout($USER)"  "uid=$(id -u) Feim logout des de lightdm"
+
+
+if [ "$USER" = "" ];then
+        logger -t "linuxcaib-lightdm-logout($USER)"  "res a fer, és un canvi dins del greeter"        
+        exit 0; #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
 fi
+
+logger -t "linuxcaib-lightdm-logout($USER)"  "és un shutdown d'usuari ($USER)"
+
+USER_GID=$(id $USER -gn)
+#if [ -f /home/$USER/shutdown-lightdm.txt ];then
+#        rm /home/$USER/shutdown-lightdm.txt
+#        touch /home/$USER/shutdown-lightdm.txt
+#        chown $USER:"$USER_GID" /home/$USER/shutdown-lightdm.txt
+#fi
 stamp=`/bin/date +'%Y%m%d%H%M%S %a'`
-echo "$stamp iniciant shutdown lightdm de l'usuari $USER amb id=$(id -u)  DISPLAY=$DISPLAY" >> /home/$USER/shutdown-lightdm.txt
+echo "$stamp iniciant shutdown lightdm de l'usuari $USER amb id=$(id -u)  DISPLAY=$DISPLAY fitxer: /home/$USER/shutdown-lightdm-$stamp.txt" >> /home/$USER/shutdown-lightdm-$stamp.txt
+
 [ "$DEBUG" -gt "1" ] && logger -t "linuxcaib-lightdm-logout($USER)" -s "entorn: env=$(env)"
 echo $USER > /var/run/caib-last-logout-user
 
@@ -32,14 +44,6 @@ cat /var/run/caib-last-logout-user >> /home/$USER/shutdown-lightdm.txt
 #logger -t "linuxcaib-lightdm-logout($USER)" -s  "Intentant obrir missatge a les X"
 #logger -t "linuxcaib-lightdm-logout($USER)" -s  "contingut xauthority de  $USER: $(cat /home/$USER/.Xauthority) "
 #logger -t "linuxcaib-lightdm-logout($USER)" -s  "xauth -f /home/$USER/.Xauthority -i list  --> $(xauth -f /home/$USER/.Xauthority -i list 2>&1 | tee) "        
-
-
-logger -t "linuxcaib-lightdm-logout($USER)"  "uid=$(id -u) Feim logout des de lightdm"
-
-if [ "$USER" = "" ];then
-        logger -t "linuxcaib-lightdm-logout($USER)"  "res a fer, és un canvi dins del greeter"        
-        exit 0; #Si no hi ha usuari és un canvi dins del greeter que no cal fer res. 
-fi
 
 
 #Ruta base scripts

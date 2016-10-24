@@ -57,7 +57,6 @@ proxyOff
 CNTLMVERSION=`dpkg -l| grep cntlm | grep ^.i |   awk 'BEGIN { FS = " " } ; { print $3 }'`
 ARCH=$(dpkg --print-architecture)
 if [ "$CNTLMVERSION" = "" ];then
-    echo ""
     logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "ALERTA: intentare instal·lar el paquet CNTLM de la caib"
 
     # Detectar arquitectura del sistema i baixar el cntlm_i386 o cntlm_amd64 de la ruta corresponent.
@@ -87,7 +86,6 @@ if [ "$CNTLMVERSION" = "" ];then
         logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "ERROR: No he pogut obtenir el cntlm ni de la unitat P ni de http://gforge.caib.es/docman/view.php/160/140/cntlm_0.92.3-caib_"$ARCH".deb dins /tmp/cntlm_0.92.3-caib_"$ARCH".deb"
         echo "60" ; echo "# ERROR instal·lant CNTLM"; sleep $LONGSLEEP  
     fi
-
     echo ""
 else
 	logger -t "linuxcaib-conf-proxy-server($LOCALUSERNAME)" -s "Versió detectada del cntlm: $CNTLMVERSION, deshabilitam el servei de cntlm (s'iniciarà manualment)"

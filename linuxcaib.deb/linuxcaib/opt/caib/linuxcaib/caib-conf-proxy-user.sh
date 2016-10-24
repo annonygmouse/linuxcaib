@@ -13,6 +13,7 @@
 #    - a nivell de variables d'entorn (http_proxy, https_proxy etc.)
 # 6. Afageix els certificats SSL dels proxies a java i aplicacions mozilla. 
 
+# TODO: comprovar configuració quan s'empra un cntlm NOCAIB.
 
 #Configura totes les aplicacions per a que empring el servidor CNTLM.
 PROXYSERVER_PAC=http://proxy.caib.es/PACCAIB.txt
@@ -55,7 +56,8 @@ RUTAPIDCNTLM="$TMPMEM/""$USERNAME/""$USERNAME""_cntlm.pid"
 
 logger -t "linuxcaib-conf-proxy-user($USERNAME)" -s "CNTLM: RUTAPIDCNTLM=$RUTAPIDCNTLM"
 
-if [ "$CNTLMVERSION" = "0.92.3-caib" ];then
+#TODO: millorar substring!
+if [ "$(echo $CNTLMVERSION | cut -c1-11)" = "0.92.3-caib" ];then
         #Versió de cntlm amb autenticació BASIC i forçant user agent linux
 echo "#
 #IMPORTANT, hi ha una regla a l'ironport que si dins user-agent hi ha \"linux\" obliga a autenticar via BASIC que amb CNTLM estàndard NO funciona. S'ha d'emprar el cntlm-0.92.3.httpauth de la CAIB ja que afageix sempre la paraula linux a l'User-Agent de les peticions
@@ -85,7 +87,7 @@ echo "Allow 127.0.0.1
 Username        $USERNAME 
 Domain        CAIB 
 Workstation        $HOSTNAME 
-Auth NLTMv2
+Auth NTLMv2
 PassNTLMv2      $CNTLMPASSWORD
 Proxy                $SERVIDORPROXYCAIB 
 NoProxy        $hostnamesDirectes $networksDirectes $dominisDirectes  localhost
